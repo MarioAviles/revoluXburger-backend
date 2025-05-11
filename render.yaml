@@ -1,10 +1,8 @@
 services:
   - type: web
-    name: revoluXburger-backend
-    env: java
-    buildCommand: "./mvnw clean package"
-    startCommand: "java -jar target/*.jar"
+    name: revoluxburger-backend
+    env: docker
     plan: free
-    envVars:
-      - key: SPRING_PROFILES_ACTIVE
-        value: production
+    repo: https://github.com/MarioAviles/revoluXburger-backend
+    buildCommand: bash install-java.sh && bash mvnw clean package -DskipTests
+    startCommand: java -jar target/*.jar
