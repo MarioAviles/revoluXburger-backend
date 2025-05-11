@@ -1,11 +1,11 @@
-# Usa una imagen oficial de Java y Maven
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+# Etapa de construcción
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Usa una imagen ligera para correr la app
-FROM eclipse-temurin:17-jre
+# Etapa de ejecución
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
