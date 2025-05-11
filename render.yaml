@@ -4,5 +4,5 @@ services:
     env: docker
     plan: free
     repo: https://github.com/MarioAviles/revoluXburger-backend
-    buildCommand: bash install-java.sh && bash mvnw clean package -DskipTests
-    startCommand: java -jar target/*.jar
+    branch: main
+    dockerfilePath: ./Dockerfile
