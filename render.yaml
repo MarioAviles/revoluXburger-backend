@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: revoluXburger-backend
+    env: java
+    buildCommand: "./mvnw clean package"
+    startCommand: "java -jar target/*.jar"
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
