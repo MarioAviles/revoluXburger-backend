@@ -45,7 +45,6 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/login", "/auth/**").permitAll() //permito el registro y el inicio de sesion a todo el mundo
                         .requestMatchers("/h2-console/**").permitAll() //permito el acceso a la base de datos
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
-                        .requestMatchers("http://localhost:5173").permitAll()//permito el acceso a react
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll() //permiso que cualquiera pueda hacer una reserva
                         .requestMatchers("/reservations/**").authenticated() //solo los usuarios autenticados pueden ver las reservas
                         .anyRequest().authenticated()
