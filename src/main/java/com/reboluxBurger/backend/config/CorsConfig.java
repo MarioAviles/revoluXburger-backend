@@ -17,7 +17,7 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://tu-frontend.vercel.app" // <-- reemplázalo por tu URL real del frontend desplegado
+                                "https://revoluxburger-frontend.vercel.app/" // <-- reemplázalo por tu URL real del frontend desplegado
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
