@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/**").permitAll() //permito el registro y el inicio de sesion a todo el mundo
+                        .requestMatchers("/", "/auth/register", "/auth/login", "/auth/**").permitAll() //permito el registro y el inicio de sesion a todo el mundo
                         .requestMatchers("/h2-console/**").permitAll() //permito el acceso a la base de datos
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll() //permiso que cualquiera pueda hacer una reserva
