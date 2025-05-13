@@ -66,7 +66,7 @@ public class AuthService {
                             .collect(Collectors.toList())))
                     .collect(Collectors.toList());
         } else {
-            throw new RuntimeException("No tienes autorización para mostrar los tasks");
+            throw new RuntimeException("No tienes autorización para mostrar los usuarios");
         }
 
     }
@@ -84,17 +84,25 @@ public class AuthService {
 
     public User updateUser(Long userId, AuthRequest authRequest) {
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("No existe un task con ese id"));
+                .orElseThrow(() -> new RuntimeException("No existe un usuario con ese id"));
         User currentUser = getCurrentUser();
 
         if (existingUser.getId().equals(currentUser.getId()) || currentUser.getRole() == Role.ADMIN) {
 
             existingUser.setUsername(authRequest.getUsername());
-            existingUser.setPassword(authRequest.getPassword());
+            if (authRequest.getPassword() != null && !authRequest.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(authRequest.getPassword()));
+            }
             existingUser.setEmail(authRequest.getEmail());
+
+            if (currentUser.getRole() == Role.ADMIN) {
+                existingUser.setRole(authRequest.getRole());
+                existingUser.setPoints(authRequest.getPoints() != null ? authRequest.getPoints() : existingUser.getPoints());
+            }
+
             return userRepository.save(existingUser);
         }
-        throw new RuntimeException("No tienes autorización para actualizar este task");
+        throw new RuntimeException("No tienes autorización para actualizar este usuario");
     }
 
     private User getCurrentUser() {
