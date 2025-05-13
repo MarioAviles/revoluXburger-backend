@@ -36,49 +36,42 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    // Método principal que ejecuta la lógica del filtro para autenticar las solicitudes.
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Obtiene el encabezado de autorización de la solicitud.
         String authHeader = request.getHeader("Authorization");
 
-        // Si el encabezado es nulo o no comienza con "Bearer ", pasa la solicitud al siguiente filtro sin hacer nada.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Elimina el prefijo "Bearer " para obtener solo el token.
         String token = authHeader.substring(7);
         String username = null;
 
         try {
-            // Intenta extraer el nombre de usuario del token usando JwtUtil.
             username = jwtUtil.extractUsername(token);
         } catch (ExpiredJwtException e) {
-            // Si el token ha expirado, responde con un estado 401 (No autorizado) y no continúa.
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            // Token expirado → seguir sin autenticar
+            chain.doFilter(request, response);
+            return;
+        } catch (Exception e) {
+            // Token inválido → seguir sin autenticar
+            chain.doFilter(request, response);
             return;
         }
 
-        // Si se obtuvo un nombre de usuario y no hay autenticación activa en el contexto de seguridad.
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Carga los detalles del usuario desde UserDetailsService.
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            // Crea un token de autenticación usando los detalles del usuario.
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-            // Añade detalles adicionales del contexto de solicitud.
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            // Establece la autenticación en el contexto de seguridad de Spring.
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
-        // Pasa la solicitud al siguiente filtro en la cadena de filtros.
         chain.doFilter(request, response);
     }
+
 }
