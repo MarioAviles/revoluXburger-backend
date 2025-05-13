@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll() //permito el acceso a la base de datos
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll() //permiso que cualquiera pueda hacer una reserva
+                        .requestMatchers("/menu").permitAll()  // Permitir el acceso público a /menu
                         .requestMatchers("/reservations/**").authenticated() //solo los usuarios autenticados pueden ver las reservas
                         .anyRequest().authenticated()
                 )
