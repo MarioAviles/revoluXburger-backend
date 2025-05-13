@@ -6,9 +6,12 @@ import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,12 @@ public class ReservationService {
     public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
+    }
+
+    @Scheduled(cron = "0 0 3 * * *") // Cada día a las 03:00 de la mañana
+    public void deleteExpiredReservations() {
+        List<Reservation> expiredReservations = reservationRepository.findByDateBefore(LocalDateTime.now());
+        reservationRepository.deleteAll(expiredReservations);
     }
 
     public List<ReservationRequest> getAllReservations() {
@@ -55,7 +64,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("No existe una reserva con ese id"));
 
         User currentUser = getCurrentUser();
-        validateOwnershipOrAdmin(existingReservation, currentUser, "No tienes autorización para actualizar esta reserva");
+        validateOwnerOrAdmin(existingReservation, currentUser, "No tienes autorización para actualizar esta reserva");
 
         validateReservationFields(updatedReservation);
 
@@ -72,7 +81,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
         User currentUser = getCurrentUser();
-        validateOwnershipOrAdmin(reservation, currentUser, "No tienes autorización para borrar esta reserva");
+        validateOwnerOrAdmin(reservation, currentUser, "No tienes autorización para borrar esta reserva");
 
         reservationRepository.delete(reservation);
     }
@@ -82,7 +91,7 @@ public class ReservationService {
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (username == null || username.equals("anonymousUser") || username.equals("anonymous")) {
+        if (username == null  || username.equals("anonymous")) {
             throw new RuntimeException("Usuario no autenticado");
         }
 
@@ -90,7 +99,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
-    private void validateOwnershipOrAdmin(Reservation reservation, User user, String errorMessage) {
+    private void validateOwnerOrAdmin(Reservation reservation, User user, String errorMessage) {
         boolean isOwner = reservation.getUser() != null && reservation.getUser().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
 
@@ -108,6 +117,24 @@ public class ReservationService {
         }
         if (reservation.getDate() == null) {
             throw new RuntimeException("La fecha de la reserva es obligatoria");
+        }
+
+        LocalDateTime reservationDateTime = reservation.getDate();
+        LocalTime reservationTime = reservationDateTime.toLocalTime();
+
+        boolean isLunch = !reservationTime.isBefore(LocalTime.of(13, 0)) &&
+                reservationTime.isBefore(LocalTime.of(16, 0));
+
+        boolean isDinner = !reservationTime.isBefore(LocalTime.of(20, 0)) &&
+                reservationTime.isBefore(LocalTime.of(23, 0));
+
+        //si está fuera de los horarios de comida o cena no se puede reservar
+        if (!isLunch && !isDinner) {
+            throw new RuntimeException("La hora de la reserva debe estar entre las 13:00-16:00 o 20:00-23:00");
+        }
+
+        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("La reserva no puede ser en el pasado");
         }
     }
 
