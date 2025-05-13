@@ -2,7 +2,11 @@ package com.reboluxBurger.backend.service;
 
 import com.reboluxBurger.backend.dto.MenuRequest;
 import com.reboluxBurger.backend.entity.Menu;
+import com.reboluxBurger.backend.entity.User;
+import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.MenuRepository;
+import com.reboluxBurger.backend.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +16,11 @@ import java.util.stream.Collectors;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
 
-    public MenuService(MenuRepository menuRepository) {
+    public MenuService(MenuRepository menuRepository, UserRepository userRepository) {
         this.menuRepository = menuRepository;
+        this.userRepository = userRepository;
     }
 
     public List<MenuRequest> getAllMenus() {
@@ -24,12 +30,20 @@ public class MenuService {
     }
 
     public Menu createMenu(Menu menu) {
+        User currentUser = getAuthenticatedUser();
+
+        requireAdminRole(currentUser, "No tienes permiso para crear un menú");
+
         return menuRepository.save(menu);
     }
 
     public Menu updateMenu(Long id, Menu request) {
         Menu existingMenu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menú no encontrado con id: " + id));
+
+        User currentUser = getAuthenticatedUser();
+
+        requireAdminRole(currentUser, "No tienes permiso para modificar el menú");
 
         existingMenu.setName(request.getName());
         existingMenu.setDescription(request.getDescription());
@@ -43,14 +57,33 @@ public class MenuService {
     }
 
     public void deleteMenu(Long id) {
-        if (menuRepository.existsById(id)) {
+        User currentUser = getAuthenticatedUser();
+
+        if (currentUser.getRole() == Role.ADMIN && menuRepository.existsById(id)) {
             menuRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Menú no encontrado con id: " + id);
         }
     }
 
-    // De entidad a DTO
+    // Métodos auxiliares
+
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if ("anonymous".equals(user.getUsername())) {
+            throw new RuntimeException("El usuario anónimo no tiene permisos");
+        }
+
+        return user;
+    }
+
+    private void requireAdminRole(User user, String errorMessage) {
+        if (user.getRole() != Role.ADMIN) {
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
     private MenuRequest mapToMenuRequest(Menu menu) {
         return new MenuRequest(
                 menu.getId(),
