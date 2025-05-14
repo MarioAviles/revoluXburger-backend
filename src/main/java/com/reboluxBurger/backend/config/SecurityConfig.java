@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
 //                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/menu").permitAll()  // Permitir el acceso público a /menu
+                        .requestMatchers("/images/**").permitAll() // Permitir el acceso público a las imágenes
 
                         // Permitir crear reservas sin autenticación
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
