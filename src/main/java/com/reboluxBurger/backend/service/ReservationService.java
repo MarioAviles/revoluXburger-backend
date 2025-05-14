@@ -7,6 +7,7 @@ import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -47,10 +48,12 @@ public class ReservationService {
     public Reservation createReservation(Reservation reservation) {
         validateReservationFields(reservation);
 
-        try {
-            reservation.setUser(getCurrentUser());
-        } catch (Exception e) {
-            // Si no está autenticado, asociamos el usuario "anonymous"
+        User currentUser = getCurrentUser();
+
+        if (currentUser != null) {
+            reservation.setUser(currentUser);
+        } else {
+            // Usuario no autenticado → usar usuario "anonymous"
             User anonymousUser = userRepository.findByUsername("anonymous")
                     .orElseThrow(() -> new RuntimeException("Usuario anónimo no encontrado"));
             reservation.setUser(anonymousUser);
@@ -58,6 +61,7 @@ public class ReservationService {
 
         return reservationRepository.save(reservation);
     }
+
 
     public Reservation updateReservation(Long reservationId, Reservation updatedReservation) {
         Reservation existingReservation = reservationRepository.findById(reservationId)
@@ -89,15 +93,18 @@ public class ReservationService {
     // Métodos auxiliares
 
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (username == null  || username.equals("anonymous")) {
-            throw new RuntimeException("Usuario no autenticado");
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null; // ✅ Usuario no autenticado
         }
+
+        String username = auth.getName();
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
+
 
     private void validateOwnerOrAdmin(Reservation reservation, User user, String errorMessage) {
         boolean isOwner = reservation.getUser() != null && reservation.getUser().getId().equals(user.getId());
