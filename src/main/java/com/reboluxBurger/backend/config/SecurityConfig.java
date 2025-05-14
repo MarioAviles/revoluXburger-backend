@@ -3,6 +3,7 @@ package com.reboluxBurger.backend.config;
 import com.reboluxBurger.backend.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -46,11 +47,19 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Permitir el acceso a los endpoints públicos
                         .requestMatchers("/", "/auth/register", "/auth/login", "/auth/**").permitAll() //permito el registro y el inicio de sesion a todo el mundo
                         .requestMatchers("/h2-console/**").permitAll() //permito el acceso a la base de datos
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
                         .requestMatchers("/menu").permitAll()  // Permitir el acceso público a /menu
-                        .requestMatchers("/reservations").authenticated() //solo los usuarios autenticados pueden ver las reservas
+
+                        // Permitir crear reservas sin autenticación
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").permitAll()
+
+                        // Solo usuarios autenticados pueden ver, editar o borrar reservas
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reservations/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
