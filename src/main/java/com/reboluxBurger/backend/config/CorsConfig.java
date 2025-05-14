@@ -33,6 +33,12 @@ public class CorsConfig {
                         .allowedOrigins("http://localhost:5173", "https://revoluxburger-frontend.vercel.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true);
+
+                // Recursos estáticos (imágenes)
+                registry.addMapping("/images/**")
+                        .allowedOrigins("http://localhost:5173", "https://revoluxburger-frontend.vercel.app")
+                        .allowedMethods("GET")
+                        .allowedHeaders("*");
             }
         };
     }
