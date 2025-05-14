@@ -54,12 +54,12 @@ public class SecurityConfig {
                         .requestMatchers("/menu").permitAll()  // Permitir el acceso público a /menu
 
                         // Permitir crear reservas sin autenticación
-                        .requestMatchers(HttpMethod.POST, "/api/reservations").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
 
                         // Solo usuarios autenticados pueden ver, editar o borrar reservas
-                        .requestMatchers(HttpMethod.GET, "/api/reservations/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/reservations/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
