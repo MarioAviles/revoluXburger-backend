@@ -54,16 +54,16 @@ public class DataInitializer implements CommandLineRunner {
                     new Menu(null, "Helado de Chocolate", "Bola de helado de chocolate", Postre, BigDecimal.valueOf(3), 300L, "/images/postres/BolaHeladoChocolate.jpg"),
                     new Menu(null, "Helado de Vainilla", "Bola de helado de vainilla", Postre, BigDecimal.valueOf(3), 300L, "/images/postres/BolaHeladoVainilla.png"),
                     new Menu(null, "Brownie de Chocolate", "Porción de Brownie de chocolate", Postre, BigDecimal.valueOf(3.50), 350L, "/images/postres/Brownie.jpg"),
-                    new Menu(null, "Tarta de Queso", "Porción de tarta de queso", Postre, BigDecimal.valueOf(3.50), 350L, "/images/postres/Cheesecake.png"),
+                    new Menu(null, "Tarta de Queso", "Porción de tarta de queso", Postre, BigDecimal.valueOf(3.50), 350L, "/images/postres/Cheesecake.jpg"),
                     new Menu(null, "Mousse", "Mousse de chocolate", Postre, BigDecimal.valueOf(3), 300L, "/images/postres/Mousse.png"),
                     new Menu(null, "Mousse de la Abuela", "Mousse tradicional con un pequeño toque de la abuela", Postre, BigDecimal.valueOf(3), 300L, "/images/postres/MoussedelaAbuela.png"),
                     new Menu(null, "Mousse de Pistacho", "Mousse de pistacho", Postre, BigDecimal.valueOf(3), 300L, "/images/postres/MoussedePistacho.png"),
                     new Menu(null, "Alitas del Bronx", "Alas tiernas con actitud. Jugosas por dentro, doradas por fuera y con una salsa que te va a hacer sudar. No aptas para paladares tímidos.", Entrante, BigDecimal.valueOf(7), 700L, "/images/entrantes/AlitasdelBronx.png"),
                     new Menu(null, "Aritos", "Aros de cebolla gigantes, dorados como el verano y crujientes como el primer mordisco de la libertad. Un clásico que no pide permiso.", Entrante, BigDecimal.valueOf(6), 600L, "/images/entrantes/Aritos.png"),
                     new Menu(null, "Nachorreo", "Un volcán de nachos bañados en queso fundido, jalapeños rebeldes, guacamole con flow y crema agria. El caos que te mereces.", Entrante, BigDecimal.valueOf(7.50), 750L, "/images/entrantes/Nachorreo.png"),
-                    new Menu(null, "Pollokids", " Crujientes bastoncitos de pollo empanado que no juzgan si tienes alma de niño. Bañalos en lo que quieras... o atrévete a comerlos solos. Porque cuando algo está bien hecho, no necesita acompañante.", Entrante, BigDecimal.valueOf(5), 500L, "/images/entrantes/Pollokids.png"),
+                    new Menu(null, "Pollokids", " Crujientes bastoncitos de pollo empanado que no juzgan si tienes alma de niño. Bañalos en lo que quieras... o atrévete a comerlos solos. Porque cuando algo está bien hecho, no necesita acompañante.", Entrante, BigDecimal.valueOf(5), 500L, "/images/entrantes/Pollokids.jpg"),
                     new Menu(null, "Tequeños", "Palitos venezolanos rellenos de queso que se derrite en tu boca (y en tu alma). Para mojar en sala... y perder el control.", Entrante, BigDecimal.valueOf(6.50), 650L, "/images/entrantes/Tequeños.png"),
-                    new Menu(null, "TequeñosDeluxe", "El arte del queso y lo dulce en un solo bocado. Inspirados en Da Vinci, hechos para genios del antojo. Dales un mordisco y pinta tu día de sabor.", Entrante, BigDecimal.valueOf(7), 700L, "/images/entrantes/TequeñosDeluxe.png")
+                    new Menu(null, "TequeñosDeluxe", "El arte del queso y lo dulce en un solo bocado. Inspirados en Da Vinci, hechos para genios del antojo. Dales un mordisco y pinta tu día de sabor.", Entrante, BigDecimal.valueOf(7), 700L, "/images/entrantes/TequeñosDeluxe.jpg")
                     
                     ));
             System.out.println("Datos iniciales cargados");
