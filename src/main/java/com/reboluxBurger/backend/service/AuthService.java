@@ -65,10 +65,13 @@ public class AuthService {
             return userRepository.findAll().stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getUser().getId()))
                             .collect(Collectors.toList())))
                     .collect(Collectors.toList());
+        } else if (currentUser.getRole() == Role.USER && !currentUser.getUsername().equals("anonymous")) {
+            return userRepository.findByUsername(currentUser.getUsername()).stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getUser().getId()))
+                            .collect(Collectors.toList())))
+                    .collect(Collectors.toList());
         } else {
             throw new RuntimeException("No tienes autorización para mostrar los usuarios");
         }
-
     }
 
     public void deleteUser(Long userId) {
