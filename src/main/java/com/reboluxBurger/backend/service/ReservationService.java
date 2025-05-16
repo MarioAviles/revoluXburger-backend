@@ -129,6 +129,12 @@ public class ReservationService {
         LocalDateTime reservationDateTime = reservation.getDate();
         LocalTime reservationTime = reservationDateTime.toLocalTime();
 
+        // Validar minutos en múltiplos de 15
+        int minute = reservationTime.getMinute();
+        if (minute % 15 != 0) {
+            throw new RuntimeException("La reserva debe ser en intervalos de 15 minutos (minutos permitidos: 00, 15, 30, 45).");
+        }
+
         boolean isLunch = !reservationTime.isBefore(LocalTime.of(13, 0)) &&
                 reservationTime.isBefore(LocalTime.of(16, 0));
 
@@ -142,6 +148,15 @@ public class ReservationService {
 
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("La reserva no puede ser en el pasado");
+        }
+
+        // Limitar a 15 reservas por bloque de 15 minutos
+        LocalDateTime startOfBlock = reservationDateTime.withMinute(minute).withSecond(0).withNano(0);
+        LocalDateTime endOfBlock = startOfBlock.plusMinutes(15);
+
+        int existingReservations = reservationRepository.countByDateBetween(startOfBlock, endOfBlock.minusNanos(1));
+        if (existingReservations >= 5) {
+            throw new RuntimeException("Ya hay 5 reservas registradas para este intervalo de 15 minutos. Por favor elige otro horario.");
         }
     }
 
