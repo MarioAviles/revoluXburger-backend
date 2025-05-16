@@ -116,7 +116,7 @@ public class ReservationService {
 
     private List<LocalTime> generateTimeRange(LocalTime start, LocalTime end) {
         List<LocalTime> result = new java.util.ArrayList<>();
-        for (LocalTime time = start; time.isBefore(end); time = time.plusMinutes(15)) {
+        for (LocalTime time = start; time.isBefore(end); time = time.plusMinutes(30)) {
             result.add(time);
         }
         return result;
@@ -126,9 +126,9 @@ public class ReservationService {
         return generateAllowedTimes().stream()
                 .filter(time -> {
                     LocalDateTime start = date.atTime(time);
-                    LocalDateTime end = start.plusMinutes(15);
+                    LocalDateTime end = start.plusMinutes(30);
                     int count = reservationRepository.countByDateBetween(start, end);
-                    return count < 5;
+                    return count < 10;
                 })
                 .collect(Collectors.toList());
     }
@@ -195,10 +195,10 @@ public class ReservationService {
 
         // Limitar a 15 reservas por bloque de 15 minutos
         LocalDateTime startOfBlock = reservationDateTime.withMinute(minute).withSecond(0).withNano(0);
-        LocalDateTime endOfBlock = startOfBlock.plusMinutes(15);
+        LocalDateTime endOfBlock = startOfBlock.plusMinutes(30);
 
         int existingReservations = reservationRepository.countByDateBetween(startOfBlock, endOfBlock.minusNanos(1));
-        if (existingReservations >= 5) {
+        if (existingReservations >= 10) {
             throw new RuntimeException("Ya hay 5 reservas registradas para este intervalo de 15 minutos. Por favor elige otro horario.");
         }
     }
