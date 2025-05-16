@@ -3,8 +3,12 @@ package com.reboluxBurger.backend.controllers;
 import com.reboluxBurger.backend.dto.ReservationRequest;
 import com.reboluxBurger.backend.entity.Reservation;
 import com.reboluxBurger.backend.service.ReservationService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -15,6 +19,12 @@ public class ReservationController {
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
+    }
+
+    @GetMapping("/available-times")
+    public ResponseEntity<List<LocalTime>> getAvailableTimes(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<LocalTime> availableTimes = reservationService.getAvailableTimes(date);
+        return ResponseEntity.ok(availableTimes);
     }
 
     @GetMapping

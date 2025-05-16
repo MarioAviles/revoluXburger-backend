@@ -10,8 +10,8 @@ import java.nio.file.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/uploads")
-public class UploadController {
+@RequestMapping("/uploads")
+public class UploadImagesController {
 
     // Ruta base de la carpeta static/images/
     private static final String UPLOAD_DIR = "src/main/resources/static/images/";

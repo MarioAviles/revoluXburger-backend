@@ -11,9 +11,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,6 +91,46 @@ public class ReservationService {
         validateOwnerOrAdmin(reservation, currentUser, "No tienes autorización para borrar esta reserva");
 
         reservationRepository.delete(reservation);
+    }
+
+
+    //metodos para gestionar limites de reservas por fecha
+    public Map<String, Integer> getReservationCountsForDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59);
+
+        List<Object[]> counts = reservationRepository.countReservationsGroupedByTimeSlot(start, end);
+        Map<String, Integer> result = new HashMap<>();
+        for (Object[] row : counts) {
+            result.put((String) row[0], ((Long) row[1]).intValue());
+        }
+        return result;
+    }
+
+    private List<LocalTime> generateAllowedTimes() {
+        return List.of(
+                generateTimeRange(LocalTime.of(13, 0), LocalTime.of(16, 0)),
+                generateTimeRange(LocalTime.of(20, 0), LocalTime.of(23, 0))
+        ).stream().flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private List<LocalTime> generateTimeRange(LocalTime start, LocalTime end) {
+        List<LocalTime> result = new java.util.ArrayList<>();
+        for (LocalTime time = start; time.isBefore(end); time = time.plusMinutes(15)) {
+            result.add(time);
+        }
+        return result;
+    }
+
+    public List<LocalTime> getAvailableTimes(LocalDate date) {
+        return generateAllowedTimes().stream()
+                .filter(time -> {
+                    LocalDateTime start = date.atTime(time);
+                    LocalDateTime end = start.plusMinutes(15);
+                    int count = reservationRepository.countByDateBetween(start, end);
+                    return count < 5;
+                })
+                .collect(Collectors.toList());
     }
 
     // Métodos auxiliares
