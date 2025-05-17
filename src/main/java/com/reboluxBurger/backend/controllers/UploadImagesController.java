@@ -1,7 +1,7 @@
 package com.reboluxBurger.backend.controllers;
 
-import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +21,23 @@ public class UploadImagesController {
     }
 
     @PostMapping("/image")
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("folder") String folder) {
+
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            Map<String, Object> options = ObjectUtils.asMap(
+                    "folder", folder // por ejemplo: "burgers" o "bebidas"
+            );
+
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
             String imageUrl = (String) uploadResult.get("secure_url");
 
             return ResponseEntity.ok(Map.of("url", imageUrl));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error al subir la imagen"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al subir la imagen: " + e.getMessage()));
         }
     }
+
 }
