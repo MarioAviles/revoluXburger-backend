@@ -25,19 +25,22 @@ public class UploadImagesController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("folder") String folder) {
 
-        try {
-            Map<String, Object> options = ObjectUtils.asMap(
-                    "folder", folder // por ejemplo: "burgers" o "bebidas"
-            );
+        System.out.println("Intentando subir imagen...");
+        System.out.println("Nombre del archivo: " + (file != null ? file.getOriginalFilename() : "null"));
+        System.out.println("Tamaño del archivo: " + (file != null ? file.getSize() : "null"));
+        System.out.println("Folder recibido: " + folder);
 
+        try {
+            Map<String, Object> options = ObjectUtils.asMap("folder", folder);
             Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
             String imageUrl = (String) uploadResult.get("secure_url");
-
             return ResponseEntity.ok(Map.of("url", imageUrl));
         } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al subir la imagen: " + e.getMessage()));
         }
     }
+
 
 }
