@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     private static final String SECRET_KEY = "TuClaveSecretaSuperSeguraParaJWT123456";
-    private static final long EXPIRATION_TIME = 60000; //1 día
+    private static final long EXPIRATION_TIME = 3600000; //1 Hora
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
