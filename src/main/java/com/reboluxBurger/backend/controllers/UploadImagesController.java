@@ -14,7 +14,7 @@ import java.util.*;
 public class UploadImagesController {
 
     // Ruta base de la carpeta static/images/
-    private static final String UPLOAD_DIR = "src/main/resources/static/images/";
+    private static final String UPLOAD_DIR = "uploads/public/images/";
 
     // Lista de categorías válidas (subcarpetas permitidas)
     private static final List<String> VALID_CATEGORIES = Arrays.asList("burgers", "bebidas", "entrantes", "postres");
