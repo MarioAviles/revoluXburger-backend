@@ -32,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (menuRepository.count() == 0) {
             menuRepository.saveAll(List.of(
-                    new Menu(null, "Furia Urbana", "Explosión callejera de doble carne, cheddar fundido, bacon crujiente y cebolla caramelizada. Una bomba de sabor sin reglas.", Burger, Medallon, BigDecimal.valueOf(11.50), 1150L, "/images/burgers/Furia_Urbana.png"),
+                    new Menu(null, "Furia Urbana", "Explosión callejera de doble carne, cheddar fundido, bacon crujiente y cebolla caramelizada. Una bomba de sabor sin reglas.", Burger, Medallon, BigDecimal.valueOf(11.50), 1150L, "https://res.cloudinary.com/ddxoloq91/image/upload/v1747475701/Furia_Urbana_yurexm.png"),
                     new Menu(null, "El Capo", "Carne smash doble, doble queso, cebolla morada, pepinillos y alioli mafioso. Puro poder con cada mordida.", Burger, Smash, BigDecimal.valueOf(11.50),1150L, "/images/burgers/El_Capo.png"),
                     new Menu(null, "Garden Punk", "Veggie rebelde con alcachofa crunchy, verdes frescos y mayonesa de ajo. Para los que comen verde sin ser aburridos.", Burger, Vegana, BigDecimal.valueOf(12),1200L, "/images/burgers/Garden_Punk.jpg"),
                     new Menu(null, "La Bestia", "Triple cheddar, bacon y salsa secreta. Es rápida, intensa y no perdona.", Burger, Medallon, BigDecimal.valueOf(11),1100L, "/images/burgers/La_Bestia.png"),
