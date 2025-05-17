@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll() // <-- Aquí permitimos subir imágenes sin autenticación
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reservations/available-times/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
