@@ -48,17 +48,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Permitir el acceso a los endpoints públicos
-                        .requestMatchers("/", "/auth/register", "/auth/login", "/auth/**").permitAll() //permito el registro y el inicio de sesion a todo el mundo
-                        .requestMatchers("/h2-console/**").permitAll() //permito el acceso a la base de datos
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll() //permito el acceso a swagger
-//                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/menu").permitAll()  // Permitir el acceso público a /menu
-                        .requestMatchers("/images/**").permitAll() // Permitir el acceso público a las imágenes
-
-                        // Permitir crear reservas sin autenticación
+                        .requestMatchers("/", "/auth/register", "/auth/login", "/auth/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/menu").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll() // <-- Aquí permitimos subir imágenes sin autenticación
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
-
-                        // Solo usuarios autenticados pueden ver, editar o borrar reservas
                         .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
@@ -77,12 +73,10 @@ public class SecurityConfig {
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); // 🔥 importante si usas tokens o sesiones
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 }
