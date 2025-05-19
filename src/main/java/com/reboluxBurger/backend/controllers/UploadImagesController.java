@@ -49,7 +49,9 @@ public class UploadImagesController {
             Map result = cloudinary.api().resources(
                     ObjectUtils.asMap(
                             "type", "upload",
-                            "max_results", 100
+                            "resource_type", "image",
+                            "prefix", folder.endsWith("/") ? folder : folder + "/",
+                            "max_results", 50
                     )
             );
 
@@ -65,6 +67,7 @@ public class UploadImagesController {
                     .body(Map.of("error", "Error al obtener las imágenes: " + e.getMessage()));
         }
     }
+
 
 
 
