@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,6 +42,33 @@ public class UploadImagesController {
                     .body(Map.of("error", "Error al subir la imagen: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/images/urls")
+    public ResponseEntity<?> getImageUrls(@RequestParam("folder") String folder) {
+        try {
+            Map result = cloudinary.api().resources(
+                    ObjectUtils.asMap(
+                            "type", "upload",
+                            "prefix", folder + "/",
+                            "max_results", 30
+                    )
+            );
+
+            List<Map<String, Object>> resources = (List<Map<String, Object>>) result.get("resources");
+            List<String> urls = resources.stream()
+                    .map(resource -> (String) resource.get("secure_url"))
+                    .toList();
+
+            return ResponseEntity.ok(Map.of("urls", urls));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener las imágenes: " + e.getMessage()));
+        }
+    }
+
+
+
 
 
 }
