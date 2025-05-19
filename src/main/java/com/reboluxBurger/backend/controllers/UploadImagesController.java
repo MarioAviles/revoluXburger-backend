@@ -49,8 +49,7 @@ public class UploadImagesController {
             Map result = cloudinary.api().resources(
                     ObjectUtils.asMap(
                             "type", "upload",
-                            "prefix", folder + "/",
-                            "max_results", 30
+                            "max_results", 100
                     )
             );
 
