@@ -52,8 +52,8 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll()
                         .requestMatchers("/menu").permitAll()
-                        .requestMatchers("/images/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll() // <-- Aquí permitimos subir imágenes sin autenticación
+                        .requestMatchers(HttpMethod.GET, "/uploads/images/urls").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/uploads/image").permitAll()
                         .requestMatchers("/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
 
