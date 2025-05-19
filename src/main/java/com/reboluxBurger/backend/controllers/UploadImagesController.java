@@ -46,18 +46,24 @@ public class UploadImagesController {
     @GetMapping("/images/urls")
     public ResponseEntity<?> getImageUrls(@RequestParam("folder") String folder) {
         try {
+            // Asegura que termine en "/" para buscar solo en esa carpeta
+            String folderPath = folder.endsWith("/") ? folder : folder + "/";
+
             Map result = cloudinary.api().resources(
                     ObjectUtils.asMap(
                             "type", "upload",
                             "resource_type", "image",
-                            "prefix", folder.endsWith("/") ? folder : folder + "/",
+                            "prefix", folderPath,
                             "max_results", 50
                     )
             );
 
             List<Map<String, Object>> resources = (List<Map<String, Object>>) result.get("resources");
+
+            // Solo imágenes dentro del folder exacto (puedes validar esto si tus carpetas están bien definidas)
             List<String> urls = resources.stream()
-                    .map(resource -> (String) resource.get("secure_url"))
+                    .filter(r -> ((String) r.get("public_id")).startsWith(folderPath))
+                    .map(r -> (String) r.get("secure_url"))
                     .toList();
 
             return ResponseEntity.ok(Map.of("urls", urls));
@@ -67,6 +73,7 @@ public class UploadImagesController {
                     .body(Map.of("error", "Error al obtener las imágenes: " + e.getMessage()));
         }
     }
+
 
 
 
