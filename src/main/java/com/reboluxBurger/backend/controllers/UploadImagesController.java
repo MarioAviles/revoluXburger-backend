@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/uploads")
@@ -50,18 +51,23 @@ public class UploadImagesController {
                     ObjectUtils.asMap(
                             "type", "upload",
                             "resource_type", "image",
-                            "prefix", folder + "/", // Busca imágenes con public_id que empiece por "folder/"
+                            "prefix", folder + "/", // Busca por prefijo
                             "max_results", 100
                     )
             );
 
             List<Map<String, Object>> resources = (List<Map<String, Object>>) result.get("resources");
 
+            // Debug opcional: imprime los public_id en consola
+            resources.forEach(resource -> {
+                System.out.println("📦 public_id: " + resource.get("public_id"));
+            });
+
+            // Filtra solo las imágenes directamente dentro de la carpeta (sin subcarpetas)
             List<String> urls = resources.stream()
                     .filter(resource -> {
                         String publicId = (String) resource.get("public_id");
-                        // Aseguramos que pertenece exactamente a la carpeta sin subcarpetas
-                        return publicId != null && publicId.matches(folder + "/[^/]+");
+                        return publicId != null && publicId.matches(Pattern.quote(folder) + "/[^/]+");
                     })
                     .map(resource -> (String) resource.get("secure_url"))
                     .toList();
@@ -73,5 +79,6 @@ public class UploadImagesController {
                     .body(Map.of("error", "Error al obtener las imágenes: " + e.getMessage()));
         }
     }
+
 
 }
