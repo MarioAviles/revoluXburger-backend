@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/uploads")
+@RequestMapping("/images")
 public class ImageController {
 
     private final ImageService imageService;
@@ -20,7 +20,7 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @PostMapping("/image")
+    @PostMapping
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
                                          @RequestParam("folder") String folder) {
         try {
@@ -32,7 +32,7 @@ public class ImageController {
         }
     }
 
-    @GetMapping("/images/urls")
+    @GetMapping("/urls")
     public ResponseEntity<?> getImageUrls(@RequestParam("folder") String folder) {
         try {
             List<String> urls = imageService.getImageUrls(folder);
@@ -43,7 +43,7 @@ public class ImageController {
         }
     }
 
-    @DeleteMapping("/image")
+    @DeleteMapping
     public ResponseEntity<?> deleteImage(@RequestParam("publicId") String publicId) {
         try {
             imageService.deleteImage(publicId);
