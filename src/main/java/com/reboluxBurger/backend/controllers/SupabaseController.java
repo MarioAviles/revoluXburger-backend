@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,15 +50,19 @@ public class SupabaseController {
 
     // Borrar imagen
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteImage(
+    public ResponseEntity<Map<String, String>> deleteImage(
             @RequestParam("folder") String folder,
             @RequestParam("filename") String filename
     ) {
+        Map<String, String> response = new HashMap<>();
         try {
             storageService.deleteImage(folder, filename);
-            return ResponseEntity.ok("Imagen eliminada correctamente.");
+            response.put("message", "Imagen eliminada correctamente.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error eliminando imagen: " + e.getMessage());
+            response.put("error", "Error eliminando imagen: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
+
 }
