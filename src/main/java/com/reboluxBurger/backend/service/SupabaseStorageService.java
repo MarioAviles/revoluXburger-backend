@@ -3,16 +3,13 @@ package com.reboluxBurger.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reboluxBurger.backend.dto.ImageDto;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -100,7 +97,7 @@ public class SupabaseStorageService {
     }
 
     // ELIMINAR imagen por carpeta y nombre
-    public void deleteImage(String folder, String filename) {
+    public void deleteImage(String folder) {
         String deleteUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + folder + "/" + filename;
 
         HttpHeaders headers = new HttpHeaders();
