@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SupabaseStorageService {
@@ -59,7 +60,7 @@ public class SupabaseStorageService {
 
     // LISTAR imágenes de una carpeta
 
-    public List<ImageDto> listImages(String folder) {
+    public Map<String, List<ImageDto>> listImagesGroupedByFolder() {
         String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME;
 
         HttpHeaders headers = new HttpHeaders();
@@ -67,26 +68,40 @@ public class SupabaseStorageService {
         headers.set("apikey", SUPABASE_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String requestBody = "{\"prefix\": \"" + folder + "/\"}";
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        // No envías prefix para que liste todo el bucket
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                listUrl, HttpMethod.POST, requestEntity, String.class
+                listUrl, HttpMethod.GET, requestEntity, String.class
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
-                List<ImageDto> images = new ArrayList<>();
+                Map<String, List<ImageDto>> groupedImages = new HashMap<>();
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
 
                 for (JsonNode node : root) {
-                    String name = node.get("name").asText();
-                    String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + name;
-                    images.add(new ImageDto(name, url));
+                    String fullName = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
+
+                    // Extraemos carpeta y nombre de archivo
+                    String folder;
+                    String fileName;
+                    if (fullName.contains("/")) {
+                        folder = fullName.substring(0, fullName.indexOf('/'));
+                        fileName = fullName.substring(fullName.indexOf('/') + 1);
+                    } else {
+                        folder = ""; // O puedes poner "root" o algo que indique raíz
+                        fileName = fullName;
+                    }
+
+                    String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fullName;
+                    ImageDto image = new ImageDto(fileName, url);
+
+                    groupedImages.computeIfAbsent(folder, k -> new ArrayList<>()).add(image);
                 }
 
-                return images;
+                return groupedImages;
             } catch (Exception e) {
                 throw new RuntimeException("Error procesando la respuesta: " + e.getMessage());
             }
