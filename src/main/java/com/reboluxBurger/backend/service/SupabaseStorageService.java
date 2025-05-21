@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 @Service
 public class SupabaseStorageService {
@@ -57,7 +59,7 @@ public class SupabaseStorageService {
 
     // LISTAR imágenes de una carpeta
 
-    public Map<String, List<ImageDto>> listImagesGroupedByFolder() {
+    public List<ImageDto> listImages(String folder) {
         String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME;
 
         HttpHeaders headers = new HttpHeaders();
@@ -65,40 +67,31 @@ public class SupabaseStorageService {
         headers.set("apikey", SUPABASE_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // No envías prefix para que liste todo el bucket
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        String requestBody = "{\"prefix\": \"" + folder + "/\"}";
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                listUrl, HttpMethod.GET, requestEntity, String.class
+                listUrl, HttpMethod.POST, requestEntity, String.class
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
-                Map<String, List<ImageDto>> groupedImages = new HashMap<>();
+                List<ImageDto> images = new ArrayList<>();
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
 
                 for (JsonNode node : root) {
-                    String fullName = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
+                    String name = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
 
-                    // Extraemos carpeta y nombre de archivo
-                    String folder;
-                    String fileName;
-                    if (fullName.contains("/")) {
-                        folder = fullName.substring(0, fullName.indexOf('/'));
-                        fileName = fullName.substring(fullName.indexOf('/') + 1);
-                    } else {
-                        folder = ""; // O puedes poner "root" o algo que indique raíz
-                        fileName = fullName;
+                    // Nos aseguramos de que el nombre esté dentro de la carpeta solicitada
+                    if (name.startsWith(folder + "/")) {
+                        String fileName = name.substring(name.lastIndexOf("/") + 1); // Solo el nombre del archivo
+                        String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + name;
+                        images.add(new ImageDto(fileName, url));
                     }
-
-                    String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fullName;
-                    ImageDto image = new ImageDto(fileName, url);
-
-                    groupedImages.computeIfAbsent(folder, k -> new ArrayList<>()).add(image);
                 }
 
-                return groupedImages;
+                return images;
             } catch (Exception e) {
                 throw new RuntimeException("Error procesando la respuesta: " + e.getMessage());
             }
@@ -106,6 +99,7 @@ public class SupabaseStorageService {
             throw new RuntimeException("Error al listar imágenes: " + response.getBody());
         }
     }
+
 
 
 

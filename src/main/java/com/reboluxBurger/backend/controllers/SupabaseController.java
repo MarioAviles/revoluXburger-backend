@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/images")
@@ -36,10 +35,10 @@ public class SupabaseController {
 
     // Listar imágenes por carpeta
     @GetMapping("/list")
-    public ResponseEntity<?> listImages() {
+    public ResponseEntity<?> listImages(@RequestParam("folder") String folder) {
         try {
-            Map<String, List<ImageDto>> imagesGrouped = storageService.listImagesGroupedByFolder();
-            return ResponseEntity.ok(imagesGrouped);
+            List<ImageDto> images = storageService.listImages(folder);
+            return ResponseEntity.ok(images);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error listando imágenes: " + e.getMessage());
         }
