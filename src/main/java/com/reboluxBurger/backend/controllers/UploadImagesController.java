@@ -50,7 +50,7 @@ public class UploadImagesController {
                     ObjectUtils.asMap(
                             "type", "upload",
                             "resource_type", "image",
-                            "prefix", folder + "/", // Esto busca imágenes con public_id que empiece por "folder/"
+                            "prefix", folder + "/", // Busca imágenes con public_id que empiece por "folder/"
                             "max_results", 100
                     )
             );
@@ -60,8 +60,8 @@ public class UploadImagesController {
             List<String> urls = resources.stream()
                     .filter(resource -> {
                         String publicId = (String) resource.get("public_id");
-                        // Aseguramos que pertenece a esa carpeta exactamente
-                        return publicId != null && publicId.startsWith(folder + "/");
+                        // Aseguramos que pertenece exactamente a la carpeta sin subcarpetas
+                        return publicId != null && publicId.matches(folder + "/[^/]+");
                     })
                     .map(resource -> (String) resource.get("secure_url"))
                     .toList();
