@@ -97,7 +97,7 @@ public class SupabaseStorageService {
     }
 
     // ELIMINAR imagen por carpeta y nombre
-    public void deleteImage(String folder) {
+    public void deleteImage(String folder, String filename) {
         String deleteUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + folder + "/" + filename;
 
         HttpHeaders headers = new HttpHeaders();

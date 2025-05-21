@@ -56,8 +56,8 @@ public class SupabaseController {
     ) {
         Map<String, String> response = new HashMap<>();
         try {
-            String publicId = folder + "/" + filename;
-            storageService.deleteImage(publicId);
+            String publicId = folder + "/" + filename; // ← formar el publicId correcto
+            storageService.deleteImage(folder, filename);;      // ← pasar solo publicId al servicio
             response.put("message", "Imagen eliminada correctamente.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -65,6 +65,7 @@ public class SupabaseController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
 
 
 }
