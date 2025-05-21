@@ -85,7 +85,7 @@ public class SupabaseStorageService {
                     if (node.has("name")) {
                         String fullName = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
                         String fileName = fullName.substring(fullName.lastIndexOf("/") + 1);
-                        String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fullName;
+                        String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + folder + "/" + fullName;
                         images.add(new ImageDto(fileName, url));
                     }
                 }
