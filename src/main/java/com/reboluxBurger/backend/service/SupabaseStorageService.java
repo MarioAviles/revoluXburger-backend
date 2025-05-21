@@ -1,5 +1,6 @@
 package com.reboluxBurger.backend.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -89,5 +90,12 @@ public class SupabaseStorageService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Error al eliminar imagen: " + response.getBody());
         }
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("Supabase URL: " + SUPABASE_URL);
+        System.out.println("Bucket: " + BUCKET_NAME);
+        System.out.println("API KEY: " + SUPABASE_API_KEY);
     }
 }
