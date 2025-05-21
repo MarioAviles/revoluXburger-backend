@@ -54,16 +54,20 @@ public class SupabaseStorageService {
 
     // LISTAR imágenes de una carpeta
     public String listImages(String folder) {
-        String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME + "?prefix=" + folder + "/";
+        String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + SUPABASE_API_KEY);
         headers.set("apikey", SUPABASE_API_KEY);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        // Body JSON con el prefijo
+        String body = "{\"prefix\": \"" + folder + "/\"}";
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                listUrl, HttpMethod.GET, requestEntity, String.class
+                listUrl, HttpMethod.POST, requestEntity, String.class
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
@@ -72,6 +76,7 @@ public class SupabaseStorageService {
             throw new RuntimeException("Error al listar imágenes: " + response.getBody());
         }
     }
+
 
     // ELIMINAR imagen por carpeta y nombre
     public void deleteImage(String folder, String filename) {
