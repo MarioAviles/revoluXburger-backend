@@ -67,6 +67,7 @@ public class SupabaseStorageService {
         headers.set("apikey", SUPABASE_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        // Body en formato JSON con el prefijo de la carpeta
         String requestBody = "{\"prefix\": \"" + folder + "/\"}";
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
@@ -81,12 +82,10 @@ public class SupabaseStorageService {
                 JsonNode root = mapper.readTree(response.getBody());
 
                 for (JsonNode node : root) {
-                    String name = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
-
-                    // Nos aseguramos de que el nombre esté dentro de la carpeta solicitada
-                    if (name.startsWith(folder + "/")) {
-                        String fileName = name.substring(name.lastIndexOf("/") + 1); // Solo el nombre del archivo
-                        String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + name;
+                    if (node.has("name")) {
+                        String fullName = node.get("name").asText(); // Ej: bebidas/Cerveza.jpg
+                        String fileName = fullName.substring(fullName.lastIndexOf("/") + 1);
+                        String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fullName;
                         images.add(new ImageDto(fileName, url));
                     }
                 }
@@ -99,9 +98,6 @@ public class SupabaseStorageService {
             throw new RuntimeException("Error al listar imágenes: " + response.getBody());
         }
     }
-
-
-
 
     // ELIMINAR imagen por carpeta y nombre
     public void deleteImage(String folder, String filename) {
