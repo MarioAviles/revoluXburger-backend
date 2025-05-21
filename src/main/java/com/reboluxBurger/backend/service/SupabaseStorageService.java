@@ -1,5 +1,8 @@
 package com.reboluxBurger.backend.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reboluxBurger.backend.dto.ImageDto;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -8,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 public class SupabaseStorageService {
@@ -53,7 +58,8 @@ public class SupabaseStorageService {
     }
 
     // LISTAR imágenes de una carpeta
-    public String listImages(String folder) {
+
+    public List<ImageDto> listImages(String folder) {
         String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME;
 
         HttpHeaders headers = new HttpHeaders();
@@ -61,21 +67,34 @@ public class SupabaseStorageService {
         headers.set("apikey", SUPABASE_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // Body JSON con el prefijo
-        String body = "{\"prefix\": \"" + folder + "/\"}";
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
+        String requestBody = "{\"prefix\": \"" + folder + "/\"}";
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
                 listUrl, HttpMethod.POST, requestEntity, String.class
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            return response.getBody();
+            try {
+                List<ImageDto> images = new ArrayList<>();
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+
+                for (JsonNode node : root) {
+                    String name = node.get("name").asText();
+                    String url = SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + name;
+                    images.add(new ImageDto(name, url));
+                }
+
+                return images;
+            } catch (Exception e) {
+                throw new RuntimeException("Error procesando la respuesta: " + e.getMessage());
+            }
         } else {
             throw new RuntimeException("Error al listar imágenes: " + response.getBody());
         }
     }
+
 
 
     // ELIMINAR imagen por carpeta y nombre
@@ -97,10 +116,4 @@ public class SupabaseStorageService {
         }
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("Supabase URL: " + SUPABASE_URL);
-        System.out.println("Bucket: " + BUCKET_NAME);
-        System.out.println("API KEY: " + SUPABASE_API_KEY);
-    }
 }

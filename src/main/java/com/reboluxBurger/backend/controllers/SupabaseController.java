@@ -1,9 +1,12 @@
 package com.reboluxBurger.backend.controllers;
 
+import com.reboluxBurger.backend.dto.ImageDto;
 import com.reboluxBurger.backend.service.SupabaseStorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/images")
@@ -32,14 +35,15 @@ public class SupabaseController {
 
     // Listar imágenes por carpeta
     @GetMapping("/list")
-    public ResponseEntity<String> listImages(@RequestParam("folder") String folder) {
+    public ResponseEntity<List<ImageDto>> listImages(@RequestParam("folder") String folder) {
         try {
-            String images = storageService.listImages(folder);
+            List<ImageDto> images = storageService.listImages(folder);
             return ResponseEntity.ok(images);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error listando imágenes: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
+
 
     // Borrar imagen
     @DeleteMapping("/delete")
