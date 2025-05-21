@@ -35,7 +35,7 @@ public class SupabaseStorageService {
     }
 
     // SUBIR imagen
-    public String uploadImage(MultipartFile file, String folder, MultipartFile filename) throws java.io.IOException {
+    public String uploadImage(MultipartFile file, String folder, String filename) throws java.io.IOException {
         String path = folder + "/" + filename;
         String uploadUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + path;
 
