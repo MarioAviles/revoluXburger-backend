@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,13 @@ public class ImageService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + SUPABASE_API_KEY); // Token de autorización
         headers.set("apikey", SUPABASE_API_KEY); // API Key adicional para Supabase
+
+        // Detectar tipo MIME real
+        String mimeType = URLConnection.guessContentTypeFromName(filename);
+        if (mimeType == null) {
+            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // Tipo binario para archivos
 
         // Crea el cuerpo de la petición con los bytes del archivo y los headers
