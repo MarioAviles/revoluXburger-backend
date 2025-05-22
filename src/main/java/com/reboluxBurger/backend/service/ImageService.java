@@ -52,7 +52,7 @@ public class ImageService {
             mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
 
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // Tipo binario para archivos
+        headers.setContentType(MediaType.parseMediaType(mimeType));; // Tipo binario para archivos
 
         // Crea el cuerpo de la petición con los bytes del archivo y los headers
         HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
