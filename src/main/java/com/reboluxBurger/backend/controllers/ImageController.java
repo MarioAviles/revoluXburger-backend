@@ -28,7 +28,7 @@ public class ImageController {
             @RequestParam("filename") String filename
     ) {
         try {
-            String imageUrl = imageService.uploadImage(file, folder, filename);
+            String imageUrl = imageService.uploadImage(file, folder);
             return ResponseEntity.ok().body(Map.of("url", imageUrl)); // ✅ JSON {"url": "..."}
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Error subiendo imagen: " + e.getMessage()));
