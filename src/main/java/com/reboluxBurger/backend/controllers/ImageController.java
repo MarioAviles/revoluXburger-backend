@@ -24,8 +24,7 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("folder") String folder,
-            @RequestParam("filename") String filename
+            @RequestParam("folder") String folder
     ) {
         try {
             String imageUrl = imageService.uploadImage(file, folder);
