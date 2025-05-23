@@ -35,10 +35,10 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        Category burger = categoryService.getOrCreateCategory("Burger");
-        Category entrante = categoryService.getOrCreateCategory("Entrante");
-        Category postre = categoryService.getOrCreateCategory("Postre");
-        Category bebida = categoryService.getOrCreateCategory("Bebida");
+        Category burger = categoryService.getOrCreateCategory("Burger", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/burgers.webp");
+        Category entrante = categoryService.getOrCreateCategory("Entrante", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/entrantes.webp");
+        Category postre = categoryService.getOrCreateCategory("Postre", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/postres.webp");
+        Category bebida = categoryService.getOrCreateCategory("Bebida", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/bebidas.webp");
 
         System.out.println("Burger category: " + burger);
         System.out.println("Entrante category: " + entrante);
