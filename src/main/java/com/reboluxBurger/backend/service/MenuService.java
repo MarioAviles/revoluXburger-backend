@@ -1,9 +1,11 @@
 package com.reboluxBurger.backend.service;
 
 import com.reboluxBurger.backend.dto.MenuRequest;
+import com.reboluxBurger.backend.entity.Category;
 import com.reboluxBurger.backend.entity.Menu;
 import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.enums.Role;
+import com.reboluxBurger.backend.repository.CategoryRepository;
 import com.reboluxBurger.backend.repository.MenuRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +19,12 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
-    public MenuService(MenuRepository menuRepository, UserRepository userRepository) {
+    public MenuService(MenuRepository menuRepository, UserRepository userRepository, CategoryRepository categoryRepository) {
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<MenuRequest> getAllMenus() {
@@ -29,25 +33,30 @@ public class MenuService {
                 .collect(Collectors.toList());
     }
 
-    public Menu createMenu(Menu menu) {
+    public Menu createMenu(MenuRequest request) {
         User currentUser = getAuthenticatedUser();
-
         requireAdminRole(currentUser, "No tienes permiso para crear un menú");
 
+        Menu menu = mapToMenuEntity(request);
         return menuRepository.save(menu);
     }
 
-    public Menu updateMenu(Long id, Menu request) {
+
+    public Menu updateMenu(Long id, MenuRequest request) {
         Menu existingMenu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menú no encontrado con id: " + id));
 
         User currentUser = getAuthenticatedUser();
-
         requireAdminRole(currentUser, "No tienes permiso para modificar el menú");
 
+        // Buscar la categoría por ID
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + request.getCategoryId()));
+
+        // Actualizar los campos del menú
         existingMenu.setName(request.getName());
         existingMenu.setDescription(request.getDescription());
-        existingMenu.setCategory(request.getCategory());
+        existingMenu.setCategory(category);
         existingMenu.setType(request.getType());
         existingMenu.setPoints(request.getPoints());
         existingMenu.setImageUrl(request.getImageUrl());
@@ -55,6 +64,7 @@ public class MenuService {
 
         return menuRepository.save(existingMenu);
     }
+
 
     public void deleteMenu(Long id) {
         User currentUser = getAuthenticatedUser();
@@ -89,11 +99,27 @@ public class MenuService {
                 menu.getId(),
                 menu.getName(),
                 menu.getDescription(),
-                menu.getCategory(),
+                menu.getCategory().getId(), // <-- cambio aquí
                 menu.getType(),
                 menu.getPoints(),
                 menu.getImageUrl(),
                 menu.getPrice()
+        );
+    }
+
+    private Menu mapToMenuEntity(MenuRequest dto) {
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoryId()));
+
+        return new Menu(
+                dto.getId(),
+                dto.getName(),
+                dto.getDescription(),
+                category,
+                dto.getType(),
+                dto.getPrice(),
+                dto.getPoints(),
+                dto.getImageUrl()
         );
     }
 }

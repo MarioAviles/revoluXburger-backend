@@ -1,6 +1,5 @@
 package com.reboluxBurger.backend.entity;
 
-import com.reboluxBurger.backend.enums.Category;
 import com.reboluxBurger.backend.enums.Type;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,8 +25,8 @@ public class Menu {
     @Column(nullable = false)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @Enumerated(EnumType.STRING)
@@ -64,7 +63,5 @@ public class Menu {
         this.points = points;
         this.imageUrl = imageUrl;
     }
-
-
 
 }

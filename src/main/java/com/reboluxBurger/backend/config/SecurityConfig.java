@@ -52,6 +52,8 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll()
                         .requestMatchers("/menu").permitAll()
+                        .requestMatchers("/categories").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/images/list").permitAll()
                         .requestMatchers(HttpMethod.POST, "/images/upload").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/images/delete").permitAll()

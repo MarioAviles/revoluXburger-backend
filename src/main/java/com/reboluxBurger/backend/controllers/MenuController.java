@@ -3,6 +3,7 @@ package com.reboluxBurger.backend.controllers;
 import com.reboluxBurger.backend.dto.MenuRequest;
 import com.reboluxBurger.backend.entity.Menu;
 import com.reboluxBurger.backend.service.MenuService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +24,20 @@ public class MenuController {
     }
 
     @PostMapping
-    public Menu createMenu(@RequestBody Menu menu) {
-        return menuService.createMenu(menu);
+    public ResponseEntity<Menu> createMenu(@RequestBody MenuRequest request) {
+        Menu createdMenu = menuService.createMenu(request);
+        return ResponseEntity.ok(createdMenu);
     }
 
     @PutMapping("/{id}")
-    public Menu updateMenu(@PathVariable Long id, @RequestBody Menu menu) {
-        return menuService.updateMenu(id, menu);
+    public ResponseEntity<Menu> updateMenu(@PathVariable Long id, @RequestBody MenuRequest request) {
+        Menu updatedMenu = menuService.updateMenu(id, request);
+        return ResponseEntity.ok(updatedMenu);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMenu(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMenu(@PathVariable Long id) {
         menuService.deleteMenu(id);
+        return ResponseEntity.noContent().build();
     }
 }
