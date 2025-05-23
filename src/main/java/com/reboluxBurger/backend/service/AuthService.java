@@ -64,6 +64,9 @@ public class AuthService {
 
     public List<AuthRequest> getAllUsers() {
         User currentUser = currentUserProvider.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("No estás autenticado");
+        }
         if (currentUser.getRole() == Role.ADMIN) { //si el usuario es admin ve todos los usuarios
             return userRepository.findAll().stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getEmail(), reservation.getUser().getId()))
                             .collect(Collectors.toList())))
@@ -81,6 +84,9 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
         User currentUser = currentUserProvider.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("No estás autenticado");
+        }
         if (currentUser.getRole() == Role.ADMIN) {
             userRepository.delete(user);
         } else {
@@ -92,6 +98,9 @@ public class AuthService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("No existe un usuario con ese id"));
         User currentUser = currentUserProvider.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("No estás autenticado");
+        }
 
         if (existingUser.getId().equals(currentUser.getId()) || currentUser.getRole() == Role.ADMIN) {
 

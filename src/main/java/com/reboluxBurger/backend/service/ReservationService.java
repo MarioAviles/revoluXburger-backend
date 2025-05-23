@@ -171,7 +171,7 @@ public class ReservationService {
         if (reservation.getDate() == null) {
             throw new RuntimeException("La fecha de la reserva es obligatoria");
         }
-        if (reservation.getEmail() == null || !reservation.getEmail().matches("^[\\w-.]+@[\\w-]+\\.[a-z]{2,4}$")) {
+        if (reservation.getEmail() == null || !reservation.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new RuntimeException("El email no es válido");
         }
 

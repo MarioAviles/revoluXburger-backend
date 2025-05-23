@@ -80,15 +80,22 @@ public class MenuService {
     public void deleteMenu(Long id) {
         User currentUser = currentUserProvider.getCurrentUser();
 
-        if (currentUser.getRole() == Role.ADMIN && menuRepository.existsById(id)) {
-            menuRepository.deleteById(id);
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            throw new RuntimeException("No tienes permisos para eliminar el menú");
         }
+
+        if (!menuRepository.existsById(id)) {
+            throw new RuntimeException("Menú no encontrado");
+        }
+
+        menuRepository.deleteById(id);
     }
+
 
     // Métodos auxiliares
 
     private void requireAdminRole(User user, String errorMessage) {
-        if (user.getRole() != Role.ADMIN) {
+        if (user == null || user.getRole() != Role.ADMIN) {
             throw new RuntimeException(errorMessage);
         }
     }

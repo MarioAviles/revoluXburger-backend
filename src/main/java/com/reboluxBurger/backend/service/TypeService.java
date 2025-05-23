@@ -29,31 +29,31 @@ public class TypeService {
 
     // Crea un nuevo tipo si no existe otro con ese nombre
     public Type createType(Type type) {
-
         User currentUser = currentUserProvider.getCurrentUser();
-        if (currentUser.getRole() == Role.ADMIN) {
-            if (typeRepository.existsByName(type.getName())) {
-                throw new RuntimeException("Ya existe un tipo con ese nombre");
-            }
-            return typeRepository.save(type);
-        } else {
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("No tienes permisos para crear un tipo");
         }
+
+        if (typeRepository.existsByName(type.getName())) {
+            throw new RuntimeException("Ya existe un tipo con ese nombre");
+        }
+        return typeRepository.save(type);
     }
 
     // Borra un tipo por id si existe
     public void deleteType(Long id) {
-
         User currentUser = currentUserProvider.getCurrentUser();
-        if (currentUser.getRole() == Role.ADMIN) {
-            if (!typeRepository.existsById(id)) {
-                throw new RuntimeException("tipo no encontrado");
-            }
-            typeRepository.deleteById(id);
-        } else {
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("No tienes permisos para eliminar un tipo");
         }
+
+        if (!typeRepository.existsById(id)) {
+            throw new RuntimeException("Tipo no encontrado");
+        }
+
+        typeRepository.deleteById(id);
     }
+
 
     // Obtiene un tipo por nombre, o lo crea si no existe
     public Type getOrCreateType(String name) {
