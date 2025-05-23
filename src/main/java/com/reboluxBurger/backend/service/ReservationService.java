@@ -24,11 +24,13 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final EmailService emailService;
 
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CurrentUserProvider currentUserProvider) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CurrentUserProvider currentUserProvider, EmailService emailService) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.currentUserProvider = currentUserProvider;
+        this.emailService = emailService;
     }
 
     @Scheduled(cron = "0 0 3 * * *") // Cada día a las 03:00 de la mañana
@@ -63,7 +65,19 @@ public class ReservationService {
             reservation.setUser(anonymousUser);
         }
 
-        return reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        // Enviar correo de confirmación
+        String subject = "Confirmación de tu reserva en Rebolux Burger";
+        String text = "Hola " + savedReservation.getName() + ",\n\n" +
+                "Tu reserva ha sido confirmada para el día " +
+                savedReservation.getDate().toLocalDate() + " a las " +
+                savedReservation.getDate().toLocalTime() + ".\n\n" +
+                "Gracias por reservar con nosotros.\n\nRebolux Burger 🍔";
+
+        emailService.enviarCorreo(savedReservation.getEmail(), subject, text);
+
+        return savedReservation;
     }
 
 
@@ -157,6 +171,9 @@ public class ReservationService {
         if (reservation.getDate() == null) {
             throw new RuntimeException("La fecha de la reserva es obligatoria");
         }
+        if (reservation.getEmail() == null || !reservation.getEmail().matches("^[\\w-.]+@[\\w-]+\\.[a-z]{2,4}$")) {
+            throw new RuntimeException("El email no es válido");
+        }
 
         LocalDateTime reservationDateTime = reservation.getDate();
         LocalTime reservationTime = reservationDateTime.toLocalTime();
@@ -199,6 +216,7 @@ public class ReservationService {
                 reservation.getDescription(),
                 reservation.getPhone(),
                 reservation.getDate(),
+                reservation.getEmail(),
                 reservation.getUser() != null ? reservation.getUser().getId() : null
         );
     }

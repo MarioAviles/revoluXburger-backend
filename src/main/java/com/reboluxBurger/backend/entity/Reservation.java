@@ -2,6 +2,8 @@ package com.reboluxBurger.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,11 @@ public class Reservation {
     @Column(nullable = false)
     @Pattern(regexp = "^[6-7-9]\\d{8}$", message = "El número de teléfono debe ser español y contener exactamente 9 dígitos, comenzando con 6, 7 o 9.")
     private String phone;
+
+    @Column(nullable = false)
+    @NotBlank(message = "El email no puede estar vacío")
+    @Email(message = "Formato de email no válido")
+    private String email;
 
     @Column(nullable = false)
     private LocalDateTime date;
