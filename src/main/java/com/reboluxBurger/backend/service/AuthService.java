@@ -66,7 +66,7 @@ public class AuthService {
         String text = "Hola " + user.getUsername() + ",\n\n" +
                 "Te has registrado en Revoluxburger el día " +
                 LocalDateTime.now().toLocalDate() + " a las " +
-                LocalDateTime.now().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm") + ".\n\n" +
+                LocalDateTime.now().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + ".\n\n" +
                 "Gracias por unirte a nosotros.\n\nRebolux Burger 🍔";
 
         emailService.sendEmail(user.getEmail(), subject, text);
