@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.reboluxBurger.backend.enums.Category.*;
 import static com.reboluxBurger.backend.enums.Type.*;
 
 @Component
@@ -37,9 +36,15 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         Category burger = categoryService.getOrCreateCategory("Burger");
-        Category entrante = categoryService.getOrCreateCategory("entrante");
-        Category postre = categoryService.getOrCreateCategory("postre");
-        Category bebida = categoryService.getOrCreateCategory("bebida");
+        Category entrante = categoryService.getOrCreateCategory("Entrante");
+        Category postre = categoryService.getOrCreateCategory("Postre");
+        Category bebida = categoryService.getOrCreateCategory("Bebida");
+
+        System.out.println("Burger category: " + burger);
+        System.out.println("Entrante category: " + entrante);
+        System.out.println("Postre category: " + postre);
+        System.out.println("Bebida category: " + bebida);
+
 
         if (menuRepository.count() == 0) {
             menuRepository.saveAll(List.of(
