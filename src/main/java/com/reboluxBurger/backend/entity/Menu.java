@@ -1,6 +1,5 @@
 package com.reboluxBurger.backend.entity;
 
-import com.reboluxBurger.backend.enums.Type;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,7 +28,8 @@ public class Menu {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name = "type_id")
     private Type type;
 
     @Column (nullable = false)
