@@ -68,12 +68,12 @@ public class ReservationService {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         // Enviar correo de confirmación
-        String subject = "Confirmación de tu reserva en Rebolux Burger";
+        String subject = "Confirmación de tu reserva en Revolux Burger";
         String text = "Hola " + savedReservation.getName() + ",\n\n" +
                 "Tu reserva ha sido confirmada para el día " +
                 savedReservation.getDate().toLocalDate() + " a las " +
                 savedReservation.getDate().toLocalTime() + ".\n\n" +
-                "Gracias por reservar con nosotros.\n\nRebolux Burger 🍔";
+                "Gracias por reservar con nosotros.\n\nRevolux Burger 🍔";
 
         emailService.sendEmail(savedReservation.getEmail(), subject, text);
 
