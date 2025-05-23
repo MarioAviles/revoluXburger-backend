@@ -10,6 +10,7 @@ import com.reboluxBurger.backend.repository.CategoryRepository;
 import com.reboluxBurger.backend.repository.MenuRepository;
 import com.reboluxBurger.backend.repository.TypeRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
+import com.reboluxBurger.backend.security.CurrentUserProvider;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,15 @@ public class MenuService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TypeRepository typeRepository;
+    private final CurrentUserProvider currentUserProvider;
 
-    public MenuService(MenuRepository menuRepository, UserRepository userRepository, CategoryRepository categoryRepository, TypeRepository typeRepository) {
+
+    public MenuService(MenuRepository menuRepository, UserRepository userRepository, CategoryRepository categoryRepository, TypeRepository typeRepository, CurrentUserProvider currentUserProvider) {
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.typeRepository = typeRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public List<MenuRequest> getAllMenus() {
@@ -38,7 +42,7 @@ public class MenuService {
     }
 
     public Menu createMenu(MenuRequest request) {
-        User currentUser = getAuthenticatedUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         requireAdminRole(currentUser, "No tienes permiso para crear un menú");
 
         Menu menu = mapToMenuEntity(request);
@@ -50,7 +54,7 @@ public class MenuService {
         Menu existingMenu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menú no encontrado con id: " + id));
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         requireAdminRole(currentUser, "No tienes permiso para modificar el menú");
 
         // Buscar la categoría por ID
@@ -74,7 +78,7 @@ public class MenuService {
 
 
     public void deleteMenu(Long id) {
-        User currentUser = getAuthenticatedUser();
+        User currentUser = currentUserProvider.getCurrentUser();
 
         if (currentUser.getRole() == Role.ADMIN && menuRepository.existsById(id)) {
             menuRepository.deleteById(id);
@@ -82,18 +86,6 @@ public class MenuService {
     }
 
     // Métodos auxiliares
-
-    private User getAuthenticatedUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        if ("anonymous".equals(user.getUsername())) {
-            throw new RuntimeException("El usuario anónimo no tiene permisos");
-        }
-
-        return user;
-    }
 
     private void requireAdminRole(User user, String errorMessage) {
         if (user.getRole() != Role.ADMIN) {

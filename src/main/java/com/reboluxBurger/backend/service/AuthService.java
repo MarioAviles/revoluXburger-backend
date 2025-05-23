@@ -8,6 +8,7 @@ import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
+import com.reboluxBurger.backend.security.CurrentUserProvider;
 import com.reboluxBurger.backend.security.JwtUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,12 +25,14 @@ public class AuthService {
     private final ReservationRepository reservationRepository;
     private final PasswordEncoder passwordEncoder; //llamo al codificador de contraseñas
     private final JwtUtil jwtUtil; //llamo a jwt
+    private final CurrentUserProvider currentUserProvider;
 
-    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider) {
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public AuthResponse login(AuthLoginRequest request) { //le paso por parametro lo que me envian por post
@@ -60,7 +63,7 @@ public class AuthService {
     }
 
     public List<AuthRequest> getAllUsers() {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         if (currentUser.getRole() == Role.ADMIN) { //si el usuario es admin ve todos los usuarios
             return userRepository.findAll().stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getUser().getId()))
                             .collect(Collectors.toList())))
@@ -77,7 +80,7 @@ public class AuthService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         if (currentUser.getRole() == Role.ADMIN) {
             userRepository.delete(user);
         } else {
@@ -88,7 +91,7 @@ public class AuthService {
     public User updateUser(Long userId, AuthRequest authRequest) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("No existe un usuario con ese id"));
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
 
         if (existingUser.getId().equals(currentUser.getId()) || currentUser.getRole() == Role.ADMIN) {
 
@@ -106,11 +109,5 @@ public class AuthService {
             return userRepository.save(existingUser);
         }
         throw new RuntimeException("No tienes autorización para actualizar este usuario");
-    }
-
-    private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 }

@@ -1,8 +1,12 @@
 package com.reboluxBurger.backend.service;
 
 import com.reboluxBurger.backend.entity.Type;
+import com.reboluxBurger.backend.entity.User;
+import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.TypeRepository;
+import com.reboluxBurger.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.reboluxBurger.backend.security.CurrentUserProvider;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +15,11 @@ import java.util.Optional;
 public class TypeService {
 
     private final TypeRepository typeRepository;
+    private final CurrentUserProvider currentUserProvider;
 
-    public TypeService(TypeRepository typeRepository) {
+    public TypeService(TypeRepository typeRepository, CurrentUserProvider currentUserProvider) {
         this.typeRepository = typeRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     // Devuelve todos los tipos
@@ -23,18 +29,30 @@ public class TypeService {
 
     // Crea un nuevo tipo si no existe otro con ese nombre
     public Type createType(Type type) {
-        if (typeRepository.existsByName(type.getName())) {
-            throw new RuntimeException("Ya existe un tipo con ese nombre");
+
+        User currentUser = currentUserProvider.getCurrentUser();
+        if (currentUser.getRole() == Role.ADMIN) {
+            if (typeRepository.existsByName(type.getName())) {
+                throw new RuntimeException("Ya existe un tipo con ese nombre");
+            }
+            return typeRepository.save(type);
+        } else {
+            throw new RuntimeException("No tienes permisos para crear un tipo");
         }
-        return typeRepository.save(type);
     }
 
     // Borra un tipo por id si existe
     public void deleteType(Long id) {
-        if (!typeRepository.existsById(id)) {
-            throw new RuntimeException("tipo no encontrado");
+
+        User currentUser = currentUserProvider.getCurrentUser();
+        if (currentUser.getRole() == Role.ADMIN) {
+            if (!typeRepository.existsById(id)) {
+                throw new RuntimeException("tipo no encontrado");
+            }
+            typeRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("No tienes permisos para eliminar un tipo");
         }
-        typeRepository.deleteById(id);
     }
 
     // Obtiene un tipo por nombre, o lo crea si no existe
@@ -47,6 +65,7 @@ public class TypeService {
             return typeRepository.save(new Type(null, normalized));
         }
     }
+
 
 
 }

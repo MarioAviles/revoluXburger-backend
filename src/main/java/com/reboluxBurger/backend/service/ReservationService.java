@@ -6,9 +6,8 @@ import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
+import com.reboluxBurger.backend.security.CurrentUserProvider;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,10 +23,12 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
+    private final CurrentUserProvider currentUserProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CurrentUserProvider currentUserProvider) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @Scheduled(cron = "0 0 3 * * *") // Cada día a las 03:00 de la mañana
@@ -37,7 +38,7 @@ public class ReservationService {
     }
 
     public List<ReservationRequest> getAllReservations() {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
 
         List<Reservation> reservations = currentUser.getRole() == Role.ADMIN
                 ? reservationRepository.findAll()
@@ -51,7 +52,7 @@ public class ReservationService {
     public Reservation createReservation(Reservation reservation) {
         validateReservationFields(reservation);
 
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
 
         if (currentUser != null) {
             reservation.setUser(currentUser);
@@ -70,7 +71,7 @@ public class ReservationService {
         Reservation existingReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("No existe una reserva con ese id"));
 
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         validateOwnerOrAdmin(existingReservation, currentUser, "No tienes autorización para actualizar esta reserva");
 
         validateReservationFields(updatedReservation);
@@ -87,7 +88,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getCurrentUser();
         validateOwnerOrAdmin(reservation, currentUser, "No tienes autorización para borrar esta reserva");
 
         reservationRepository.delete(reservation);
@@ -135,18 +136,6 @@ public class ReservationService {
 
     // Métodos auxiliares
 
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            return null; // ✅ Usuario no autenticado
-        }
-
-        String username = auth.getName();
-
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    }
 
 
     private void validateOwnerOrAdmin(Reservation reservation, User user, String errorMessage) {

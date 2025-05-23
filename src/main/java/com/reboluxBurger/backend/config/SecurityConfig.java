@@ -52,8 +52,14 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll()
                         .requestMatchers("/menu").permitAll()
-                        .requestMatchers("/categories", "/categories/**").permitAll()
-                        .requestMatchers("/types", "/types/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/types").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/types").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/types/**").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/categories").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/categories").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/categories/**").authenticated()
 
 
                         .requestMatchers(HttpMethod.GET, "/images/list").permitAll()
@@ -62,7 +68,6 @@ public class SecurityConfig {
 
                         .requestMatchers("/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
-
                         .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
