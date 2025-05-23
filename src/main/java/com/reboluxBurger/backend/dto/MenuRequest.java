@@ -1,6 +1,5 @@
 package com.reboluxBurger.backend.dto;
 
-import com.reboluxBurger.backend.enums.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,7 +12,7 @@ public class MenuRequest {
     private String name;
     private String description;
     private Long categoryId;
-    private Type type;
+    private Long typeId;
     private Long points;
     private String imageUrl;
     private BigDecimal price;
