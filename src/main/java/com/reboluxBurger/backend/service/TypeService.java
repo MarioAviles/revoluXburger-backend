@@ -24,7 +24,7 @@ public class TypeService {
     // Crea un nuevo tipo si no existe otro con ese nombre
     public Type createType(Type type) {
         if (typeRepository.existsByName(type.getName())) {
-            throw new RuntimeException("Ya existe una categoría con ese nombre");
+            throw new RuntimeException("Ya existe un tipo con ese nombre");
         }
         return typeRepository.save(type);
     }
@@ -32,12 +32,12 @@ public class TypeService {
     // Borra un tipo por id si existe
     public void deleteType(Long id) {
         if (!typeRepository.existsById(id)) {
-            throw new RuntimeException("Categoría no encontrada");
+            throw new RuntimeException("tipo no encontrado");
         }
         typeRepository.deleteById(id);
     }
 
-    // Obtiene una categoría por nombre, o la crea si no existe
+    // Obtiene un tipo por nombre, o lo crea si no existe
     public Type getOrCreateType(String name) {
         String normalized = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         Optional<Type> existing = typeRepository.findByName(normalized);

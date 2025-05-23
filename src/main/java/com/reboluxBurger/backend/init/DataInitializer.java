@@ -42,7 +42,6 @@ public class DataInitializer implements CommandLineRunner {
         Category postre = categoryService.getOrCreateCategory("Postre", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/postres.webp");
         Category bebida = categoryService.getOrCreateCategory("Bebida", "https://amatliizljqlgceescos.supabase.co/storage/v1/object/public/images/categorias/bebidas.webp");
 
-
         Type medallon = typeService.getOrCreateType("Medallon");
         Type smash = typeService.getOrCreateType("Smash");
         Type vegana = typeService.getOrCreateType("Vegana");
