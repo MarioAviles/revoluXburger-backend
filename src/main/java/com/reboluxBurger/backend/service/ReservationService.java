@@ -75,7 +75,7 @@ public class ReservationService {
                 savedReservation.getDate().toLocalTime() + ".\n\n" +
                 "Gracias por reservar con nosotros.\n\nRebolux Burger 🍔";
 
-        emailService.enviarCorreo(savedReservation.getEmail(), subject, text);
+        emailService.sendEmail(savedReservation.getEmail(), subject, text);
 
         return savedReservation;
     }

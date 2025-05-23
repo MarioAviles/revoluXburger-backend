@@ -10,10 +10,10 @@ import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import com.reboluxBurger.backend.security.CurrentUserProvider;
 import com.reboluxBurger.backend.security.JwtUtil;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,13 +26,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder; //llamo al codificador de contraseñas
     private final JwtUtil jwtUtil; //llamo a jwt
     private final CurrentUserProvider currentUserProvider;
+    private final EmailService emailService;
 
-    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider) {
+    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider , EmailService emailService) {
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.currentUserProvider = currentUserProvider;
+        this.emailService = emailService;
     }
 
     public AuthResponse login(AuthLoginRequest request) { //le paso por parametro lo que me envian por post
@@ -58,6 +60,15 @@ public class AuthService {
 
         Role role = (request.getRole() == null || request.getRole().describeConstable().isEmpty()) ? Role.USER : request.getRole();
         user.setRole(role);
+
+        String subject = "Confirmación de tu registro en Rebolux Burger";
+        String text = "Hola " + user.getUsername() + ",\n\n" +
+                "Te has registrado en Revoluxburger el día " +
+                LocalDateTime.now().toLocalDate() + " a las " +
+                LocalDateTime.now().toLocalTime() + ".\n\n" +
+                "Gracias por unirte a nosotros.\n\nRebolux Burger 🍔";
+
+        emailService.sendEmail(user.getEmail(), subject, text);
 
         userRepository.save(user);
     }
