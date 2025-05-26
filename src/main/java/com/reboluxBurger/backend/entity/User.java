@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column
-    private Double points;
+    private Long points;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
