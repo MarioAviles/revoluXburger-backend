@@ -48,10 +48,19 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Permitir el acceso a los endpoints públicos
-                        .requestMatchers("/", "/auth/register", "/auth/login", "/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/auth/{id}").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/auth/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/auth/{id}/**").authenticated()
+
                         .requestMatchers("/h2-console/**").permitAll()
+
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/*", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/menu").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/menu").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/types").permitAll()
                         .requestMatchers(HttpMethod.POST, "/types").authenticated()
