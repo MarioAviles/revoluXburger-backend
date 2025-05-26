@@ -68,6 +68,22 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
+        // Crear enlace para agregar a Google Calendar
+
+        LocalDateTime start = savedReservation.getDate();
+        LocalDateTime end = start.plusHours(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
+        String startTime = start.atZone(java.time.ZoneId.of("UTC")).format(formatter);
+        String endTime = end.atZone(java.time.ZoneId.of("UTC")).format(formatter);
+
+        String calendarUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+                + "&text=" + java.net.URLEncoder.encode("Reserva en Revolux Burger", java.nio.charset.StandardCharsets.UTF_8)
+                + "&dates=" + startTime + "/" + endTime
+                + "&details=" + java.net.URLEncoder.encode("Reserva en Revolux Burger para " + savedReservation.getName(), java.nio.charset.StandardCharsets.UTF_8)
+                + "&location=" + java.net.URLEncoder.encode("Revolux Burger, Calle Ficticia 123", java.nio.charset.StandardCharsets.UTF_8)
+                + "&sf=true&output=xml";
+
+
         // Enviar correo de confirmación
         String subject = "Confirmación de tu reserva en Revolux Burger";
 
@@ -82,8 +98,11 @@ public class ReservationService {
                 "Si necesitas realizar algún cambio o cancelar tu reserva, te pedimos que nos contactes con al menos 24 horas de antelación, respondiendo a este correo o escribiéndonos directamente a revoluxburge@gmail.com.\n\n" +
                 "Recuerda que también puedes seguirnos en nuestras redes sociales para mantenerte al tanto de nuestras promociones y novedades.\n\n" +
                 "Gracias por confiar en nosotros. Será un placer atenderte.\n\n" +
+                "🗓 Puedes agregar esta reserva a tu Google Calendar haciendo clic en el siguiente enlace:\n" +
+                calendarUrl + "\n\n" +
                 "Atentamente,\n\n" +
                 "Equipo Revolux Burger 🍔\n";
+
 
 
         emailService.sendEmail(savedReservation.getEmail(), subject, text);
