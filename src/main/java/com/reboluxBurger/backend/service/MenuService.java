@@ -117,8 +117,12 @@ public class MenuService {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoryId()));
 
-        Type type = typeRepository.findById(dto.getTypeId())
-                .orElseThrow(() -> new RuntimeException("Tipo no encontrado con ID: " + dto.getTypeId()));
+        Type type = null;
+        if (dto.getTypeId() != null) {
+            type = typeRepository.findById(dto.getTypeId())
+                    .orElseThrow(() -> new RuntimeException("Tipo no encontrado con ID: " + dto.getTypeId()));
+        }
+
 
         return new Menu(
                 dto.getId(),
