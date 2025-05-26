@@ -29,7 +29,7 @@ public class Menu {
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "type_id")
+    @JoinColumn(name = "type_id", nullable = true)
     private Type type;
 
     @Column (nullable = false)
