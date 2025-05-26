@@ -53,7 +53,6 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     public Reservation createReservation(Reservation reservation) {
         validateReservationFields(reservation);
 
