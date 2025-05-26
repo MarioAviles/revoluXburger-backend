@@ -62,37 +62,13 @@ public class AuthService {
         Role role = (request.getRole() == null || request.getRole().describeConstable().isEmpty()) ? Role.USER : request.getRole();
         user.setRole(role);
 
-        String subject = "🎉 ¡Bienvenido a Revolux Burger, " + user.getUsername() + "! 🍔";
-
-        String text = "<html>" +
-            "<body style=\"font-family: Arial, sans-serif; background-color: #fff8e1; margin:0; padding:20px;\">" +
-            "<div style=\"max-width:600px; margin:auto; background:#ffffff; border-radius:8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">" +
-                "<div style=\"background-color: #fcb300; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;\">" +
-                    "<h1 style=\"color: #fff; margin: 0; font-size: 24px;\">Revolux Burger 🍔</h1>" +
-                "</div>" +
-                "<div style=\"padding: 30px; color: #333;\">" +
-                    "<h2 style=\"color: #fcb300;\">Hola " + user.getUsername() + ",</h2>" +
-                    "<p style=\"font-size: 16px; line-height: 1.5;\">" +
-                        "¡Gracias por unirte a la familia Revolux Burger! Tu registro se completó el día <strong>" +
-                        LocalDateTime.now().toLocalDate() + "</strong> a las <strong>" +
-                        LocalDateTime.now().toLocalTime().format(DateTimeFormatter.ofPattern(\"HH:mm\")) + "</strong>." +
-                    "</p>" +
-                    "<p style=\"font-size: 16px; line-height: 1.5;\">" +
-                        "Prepárate para disfrutar promociones exclusivas, eventos especiales y mucho más." +
-                    "</p>" +
-                    "<p style=\"font-weight: bold; font-size: 16px; margin-top: 30px;\">" +
-                        "¡Nos encanta tenerte con nosotros! 🍔🔥" +
-                    "</p>" +
-                "</div>" +
-                "<div style=\"background-color: #fcb300; padding: 15px; border-radius: 0 0 8px 8px; text-align: center; color: #fff; font-size: 14px;\">" +
-                    "Revolux Burger - Tu lugar para una experiencia deliciosa" +
-                "</div>" +
-            "</div>" +
-            "</body>" +
-            "</html>";
-
-        emailService.sendEmail(user.getEmail(), subject, text, true);
-
+        String subject = "Confirmación de tu registro en Rebolux Burger";
+        String text = "Hola " + user.getUsername() + ",\n\n" +
+                "Te has registrado en Revoluxburger el día " +
+                LocalDateTime.now().toLocalDate() + " a las " +
+                LocalDateTime.now().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + ".\n\n" +
+                "Gracias por unirte a nosotros.\n\nRebolux Burger 🍔";
+        emailService.sendEmail(user.getEmail(), subject, text);
 
         userRepository.save(user);
     }
