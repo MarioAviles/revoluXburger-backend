@@ -72,15 +72,15 @@ public class ReservationService {
 
         LocalDateTime start = savedReservation.getDate();
         LocalDateTime end = start.plusHours(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
-        String startTime = start.atZone(java.time.ZoneId.of("UTC")).format(formatter);
-        String endTime = end.atZone(java.time.ZoneId.of("UTC")).format(formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+        String startTime = start.format(formatter);
+        String endTime = end.format(formatter);
 
         String calendarUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE"
                 + "&text=" + java.net.URLEncoder.encode("Reserva en Revolux Burger", java.nio.charset.StandardCharsets.UTF_8)
                 + "&dates=" + startTime + "/" + endTime
                 + "&details=" + java.net.URLEncoder.encode("Reserva en Revolux Burger para " + savedReservation.getName(), java.nio.charset.StandardCharsets.UTF_8)
-                + "&location=" + java.net.URLEncoder.encode("Revolux Burger, Calle Ficticia 123", java.nio.charset.StandardCharsets.UTF_8)
+                + "&location=" + java.net.URLEncoder.encode("Revolux Burger, Calle Carlos III", java.nio.charset.StandardCharsets.UTF_8)
                 + "&sf=true&output=xml";
 
 
@@ -95,7 +95,7 @@ public class ReservationService {
                 "👤 Nombre de la reserva: " + savedReservation.getName() + "\n" +
                 "📧 Correo de contacto: " + savedReservation.getEmail() + "\n\n" +
                 "Tu mesa estará lista a tu llegada. Nos esforzamos por ofrecer una experiencia gastronómica de alta calidad, con un ambiente acogedor y un servicio excepcional.\n\n" +
-                "Si necesitas realizar algún cambio o cancelar tu reserva, te pedimos que nos contactes con al menos 24 horas de antelación, respondiendo a este correo o escribiéndonos directamente a revoluxburge@gmail.com.\n\n" +
+                "Si necesitas realizar algún cambio o cancelar tu reserva, te pedimos que nos contactes con al menos 24 horas de antelación, respondiendo a este correo o escribiéndonos directamente a revoluxburger@gmail.com.\n\n" +
                 "Recuerda que también puedes seguirnos en nuestras redes sociales para mantenerte al tanto de nuestras promociones y novedades.\n\n" +
                 "Gracias por confiar en nosotros. Será un placer atenderte.\n\n" +
                 "🗓 Puedes agregar esta reserva a tu Google Calendar haciendo clic en el siguiente enlace:\n" +
