@@ -75,6 +75,7 @@ public class AuthService {
                 "Atentamente,\n\n" +
                 "El equipo de Revolux Burger 🍔";
 
+        emailService.sendEmail(user.getEmail(), subject, text);
 
         userRepository.save(user);
     }
