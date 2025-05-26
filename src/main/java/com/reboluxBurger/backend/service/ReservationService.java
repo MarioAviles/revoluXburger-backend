@@ -67,15 +67,39 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        // Enviar correo de confirmación
-        String subject = "Confirmación de tu reserva en Revolux Burger";
-        String text = "Hola " + savedReservation.getName() + ",\n\n" +
-                "Tu reserva ha sido confirmada para el día " +
-                savedReservation.getDate().toLocalDate() + " a las " +
-                savedReservation.getDate().toLocalTime() + ".\n\n" +
-                "Gracias por reservar con nosotros.\n\nRevolux Burger 🍔";
+        // Construir el correo con HTML y estilo inline para mejor compatibilidad
+    String subject = "🎉 ¡Tu reserva en Revolux Burger está confirmada! 🍔";
 
-        emailService.sendEmail(savedReservation.getEmail(), subject, text);
+    String text = "<html>" +
+        "<body style=\"font-family: Arial, sans-serif; background-color: #fff8e1; margin:0; padding:20px;\">" +
+        "<div style=\"max-width:600px; margin:auto; background:#ffffff; border-radius:8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">" +
+            "<div style=\"background-color: #fcb300; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;\">" +
+                "<h1 style=\"color: #fff; margin: 0; font-size: 24px;\">Revolux Burger 🍔</h1>" +
+            "</div>" +
+            "<div style=\"padding: 30px; color: #333;\">" +
+                "<h2 style=\"color: #fcb300;\">Hola " + savedReservation.getName() + ",</h2>" +
+                "<p style=\"font-size: 16px; line-height: 1.5;\">¡Tu mesa está lista y te estamos esperando!</p>" +
+                "<p style=\"font-size: 16px; line-height: 1.5;\">" +
+                    "Tu reserva ha sido confirmada para el <strong>" +
+                    savedReservation.getDate().toLocalDate() + "</strong> a las <strong>" +
+                    savedReservation.getDate().toLocalTime() + "</strong>." +
+                "</p>" +
+                "<p style=\"font-size: 16px; line-height: 1.5;\">" +
+                    "Prepárate para disfrutar de las mejores hamburguesas de la ciudad con ingredientes frescos y un ambiente único." +
+                "</p>" +
+                "<p style=\"font-size: 16px; line-height: 1.5;\">Si tienes alguna duda o quieres modificar tu reserva, no dudes en contactarnos.</p>" +
+                "<p style=\"font-weight: bold; font-size: 16px; margin-top: 30px;\">¡Nos vemos pronto en Revolux Burger! 🍔🔥</p>" +
+            "</div>" +
+            "<div style=\"background-color: #fcb300; padding: 15px; border-radius: 0 0 8px 8px; text-align: center; color: #fff; font-size: 14px;\">" +
+                "Revolux Burger - Tu lugar para una experiencia deliciosa" +
+            "</div>" +
+        "</div>" +
+        "</body>" +
+        "</html>";
+
+    // Enviar el correo indicando que es HTML
+    emailService.sendEmail(savedReservation.getEmail(), subject, text, true);
+
 
         return savedReservation;
     }
