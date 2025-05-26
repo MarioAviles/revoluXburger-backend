@@ -6,6 +6,7 @@ import com.reboluxBurger.backend.dto.AuthResponse;
 import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -44,4 +45,12 @@ public class AuthController {
         authService.deleteUser(id);
     }
 
+    @PatchMapping("/{id}/points")
+    public ResponseEntity<User> updateUserPoints(
+            @PathVariable Long id,
+            @RequestParam Long pointsToAdd) {
+
+        User updatedUser = authService.addPointsToUser(id, pointsToAdd);
+        return ResponseEntity.ok(updatedUser);
+    }
 }

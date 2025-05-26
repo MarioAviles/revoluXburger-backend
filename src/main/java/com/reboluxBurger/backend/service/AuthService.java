@@ -137,4 +137,16 @@ public class AuthService {
         }
         throw new RuntimeException("No tienes autorización para actualizar este usuario");
     }
+
+    public User addPointsToUser(Long userId, Long pointsToAdd) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getPoints() == null) {
+            user.setPoints(0L);
+        }
+
+        user.setPoints(user.getPoints() + pointsToAdd);
+        return userRepository.save(user);
+    }
 }
