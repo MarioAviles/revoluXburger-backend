@@ -71,11 +71,20 @@ public class ReservationService {
         // Enviar correo de confirmación
         String subject = "Confirmación de tu reserva en Revolux Burger";
 
-        String text = "Hola " + savedReservation.getName() + ",\n\n" +
-                "Tu reserva ha sido confirmada para el día " +
-                savedReservation.getDate().toLocalDate() + " a las " +
-                savedReservation.getDate().toLocalTime() + ".\n\n" +
-        "Gracias por reservar con nosotros.\n\nRevolux Burger 🍔";
+        String text = "Estimado/a " + savedReservation.getName() + ",\n\n" +
+                "Te agradecemos por elegir Revolux Burger para tu próxima visita. Nos complace informarte que tu reserva ha sido registrada exitosamente en nuestro sistema.\n\n" +
+                "Aquí tienes los detalles de tu reserva:\n\n" +
+                "📅 Fecha: " + savedReservation.getDate().toLocalDate() + "\n" +
+                "⏰ Hora: " + savedReservation.getDate().toLocalTime() + "\n" +
+                "👤 Nombre de la reserva: " + savedReservation.getName() + "\n" +
+                "📧 Correo de contacto: " + savedReservation.getEmail() + "\n\n" +
+                "Tu mesa estará lista a tu llegada. Nos esforzamos por ofrecer una experiencia gastronómica de alta calidad, con un ambiente acogedor y un servicio excepcional.\n\n" +
+                "Si necesitas realizar algún cambio o cancelar tu reserva, te pedimos que nos contactes con al menos 24 horas de antelación, respondiendo a este correo o escribiéndonos directamente a contacto@reboluxburger.com.\n\n" +
+                "Recuerda que también puedes seguirnos en nuestras redes sociales para mantenerte al tanto de nuestras promociones y novedades.\n\n" +
+                "Gracias por confiar en nosotros. Será un placer atenderte.\n\n" +
+                "Atentamente,\n\n" +
+                "Equipo Revolux Burger 🍔\n";
+
 
         emailService.sendEmail(savedReservation.getEmail(), subject, text);
 

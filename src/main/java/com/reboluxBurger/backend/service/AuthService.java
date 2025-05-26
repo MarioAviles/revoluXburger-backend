@@ -62,13 +62,19 @@ public class AuthService {
         Role role = (request.getRole() == null || request.getRole().describeConstable().isEmpty()) ? Role.USER : request.getRole();
         user.setRole(role);
 
-        String subject = "Confirmación de tu registro en Rebolux Burger";
-        String text = "Hola " + user.getUsername() + ",\n\n" +
-                "Te has registrado en Revoluxburger el día " +
+        String subject = "Confirmación de tu registro en Revolux Burger";
+
+        String text = "Estimado/a " + user.getUsername() + ",\n\n" +
+                "Nos complace darte la bienvenida a la familia de *Revolux Burger*.\n\n" +
+                "Tu registro se ha completado exitosamente el día " +
                 LocalDateTime.now().toLocalDate() + " a las " +
                 LocalDateTime.now().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + ".\n\n" +
-                "Gracias por unirte a nosotros.\n\nRebolux Burger 🍔";
-        emailService.sendEmail(user.getEmail(), subject, text);
+                "A partir de ahora podrás realizar reservas, acumular puntos y disfrutar de nuestras promociones exclusivas para miembros registrados.\n\n" +
+                "Si no fuiste tú quien realizó este registro, por favor ignora este mensaje o contáctanos de inmediato.\n\n" +
+                "¡Gracias por confiar en nosotros!\n\n" +
+                "Atentamente,\n\n" +
+                "El equipo de Revolux Burger 🍔";
+
 
         userRepository.save(user);
     }
