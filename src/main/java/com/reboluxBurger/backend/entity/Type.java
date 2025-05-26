@@ -11,7 +11,7 @@ import lombok.*;
 public class Type {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY, nullable = false)
     private Long id;
 
     @Column(unique = true, nullable = false)
