@@ -14,11 +14,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDateBefore(LocalDateTime dateTime);
     int countByDateBetween(LocalDateTime start, LocalDateTime end);
 
-    //para obtener las reservas agrupadas por hora
     @Query("SELECT FUNCTION('DATE_FORMAT', r.date, '%Y-%m-%dT%H:%i') as timeSlot, COUNT(r) " +
             "FROM Reservation r " +
             "WHERE r.date BETWEEN :start AND :end " +
             "GROUP BY timeSlot")
     List<Object[]> countReservationsGroupedByTimeSlot(LocalDateTime start, LocalDateTime end);
 
+    // Nuevo método para sumar personas por intervalo
+    @Query("SELECT COALESCE(SUM(r.numberOfPersons), 0) FROM Reservation r WHERE r.date BETWEEN :start AND :end")
+    int sumNumberOfPersonsByDateBetween(LocalDateTime start, LocalDateTime end);
 }

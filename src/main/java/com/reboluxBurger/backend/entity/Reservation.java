@@ -42,6 +42,9 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDateTime date;
 
+    @Column(nullable = false)
+    private Long numberOfPersons;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = true)
     @JsonBackReference

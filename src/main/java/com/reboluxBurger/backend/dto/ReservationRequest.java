@@ -13,6 +13,7 @@ public class ReservationRequest {
     private String description;
     private String phone;
     private LocalDateTime date;
+    private Long numberOfPersons;
     private String email;
     private Long user_id;
 }

@@ -103,13 +103,10 @@ public class ReservationService {
                 "Atentamente,\n\n" +
                 "Equipo Revolux Burger 🍔\n";
 
-
-
         emailService.sendEmail(savedReservation.getEmail(), subject, text);
 
         return savedReservation;
     }
-
 
     public Reservation updateReservation(Long reservationId, Reservation updatedReservation) {
         Reservation existingReservation = reservationRepository.findById(reservationId)
@@ -124,6 +121,8 @@ public class ReservationService {
         existingReservation.setDescription(updatedReservation.getDescription());
         existingReservation.setName(updatedReservation.getName());
         existingReservation.setPhone(updatedReservation.getPhone());
+        existingReservation.setNumberOfPersons(updatedReservation.getNumberOfPersons());
+
 
         return reservationRepository.save(existingReservation);
     }
@@ -229,13 +228,13 @@ public class ReservationService {
             throw new RuntimeException("La reserva no puede ser en el pasado");
         }
 
-        // Limitar a 15 reservas por bloque de 15 minutos
+        // Limitar a 25 personas por bloque de 30 minutos
         LocalDateTime startOfBlock = reservationDateTime.withMinute(minute).withSecond(0).withNano(0);
         LocalDateTime endOfBlock = startOfBlock.plusMinutes(30);
 
-        int existingReservations = reservationRepository.countByDateBetween(startOfBlock, endOfBlock.minusNanos(1));
-        if (existingReservations >= 10) {
-            throw new RuntimeException("Ya hay 5 reservas registradas para este intervalo de 15 minutos. Por favor elige otro horario.");
+        int existingPersons = reservationRepository.sumNumberOfPersonsByDateBetween(startOfBlock, endOfBlock.minusNanos(1));
+        if (existingPersons + reservation.getNumberOfPersons() > 25) {
+            throw new RuntimeException("El número máximo de personas (25) ya ha sido alcanzado para este intervalo. Por favor elige otro horario.");
         }
     }
 
@@ -246,6 +245,7 @@ public class ReservationService {
                 reservation.getDescription(),
                 reservation.getPhone(),
                 reservation.getDate(),
+                reservation.getNumberOfPersons(),
                 reservation.getEmail(),
                 reservation.getUser() != null ? reservation.getUser().getId() : null
         );
