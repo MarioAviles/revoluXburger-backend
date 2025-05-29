@@ -135,6 +135,23 @@ public class ReservationService {
         validateOwnerOrAdmin(reservation, currentUser, "No tienes autorización para borrar esta reserva");
 
         reservationRepository.delete(reservation);
+
+        String subject = "Cancelación de tu reserva en Revolux Burger";
+
+        String text = "Estimado/a " + reservation.getName() + ",\n\n" +
+                "Te informamos que tu reserva en Revolux Burger ha sido cancelada.\n\n" +
+                "Detalles de la reserva cancelada:\n\n" +
+                "📅 Fecha: " + reservation.getDate().toLocalDate() + "\n" +
+                "⏰ Hora: " + reservation.getDate().toLocalTime() + "\n" +
+                "👤 Nombre de la reserva: " + reservation.getName() + "\n" +
+                "📧 Correo de contacto: " + reservation.getEmail() + "\n\n" +
+                "Si necesitas realizar una nueva reserva, estaremos encantados de atenderte.\n\n" +
+                "Para cualquier consulta, no dudes en contactarnos respondiendo a este correo o escribiéndonos directamente a revoluxburger@gmail.com.\n\n" +
+                "Gracias por tu comprensión.\n\n" +
+                "Atentamente,\n\n" +
+                "Equipo Revolux Burger 🍔\n";
+
+        emailService.sendEmail(reservation.getEmail(), subject, text);
     }
 
 
