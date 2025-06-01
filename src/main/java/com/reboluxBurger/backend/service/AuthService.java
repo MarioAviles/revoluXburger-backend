@@ -4,8 +4,10 @@ import com.reboluxBurger.backend.dto.AuthLoginRequest;
 import com.reboluxBurger.backend.dto.AuthRequest;
 import com.reboluxBurger.backend.dto.AuthResponse;
 import com.reboluxBurger.backend.dto.ReservationRequest;
+import com.reboluxBurger.backend.entity.PasswordResetToken;
 import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.enums.Role;
+import com.reboluxBurger.backend.repository.PasswordResetTokenRepository;
 import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import com.reboluxBurger.backend.security.CurrentUserProvider;
@@ -15,8 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,14 +32,16 @@ public class AuthService {
     private final JwtUtil jwtUtil; //llamo a jwt
     private final CurrentUserProvider currentUserProvider;
     private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider , EmailService emailService) {
+    public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider , EmailService emailService, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.currentUserProvider = currentUserProvider;
         this.emailService = emailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     public AuthResponse login(AuthLoginRequest request) { //le paso por parametro lo que me envian por post
@@ -149,4 +155,42 @@ public class AuthService {
         user.setPoints(user.getPoints() + pointsToAdd);
         return userRepository.save(user);
     }
+
+    public void sendPasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No existe usuario con ese email"));
+
+        String token = UUID.randomUUID().toString();
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 30); // 30 min
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpirationDate(expiration);
+        passwordResetTokenRepository.save(resetToken);
+
+        String link = "https://revoluxburger-frontend.vercel.app/reset-password?token=" + token; //cambia esto por tu URL real
+        String body = "Hola " + user.getUsername() + ",\n\n" +
+                "Para restablecer tu contraseña, haz clic en el siguiente enlace:\n" + link + "\n\n" +
+                "Este enlace expirará en 30 minutos.";
+
+        emailService.sendEmail(user.getEmail(), "Restablecer contraseña", body);
+    }
+
+    public void resetPassword(String token, String nuevaPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido"));
+
+        if (resetToken.isExpired()) {
+            throw new RuntimeException("El token ha expirado");
+        }
+
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(nuevaPassword));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken); // borra token usado
+    }
+
+
 }
