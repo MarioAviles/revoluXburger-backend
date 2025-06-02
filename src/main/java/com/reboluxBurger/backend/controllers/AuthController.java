@@ -1,8 +1,6 @@
 package com.reboluxBurger.backend.controllers;
 
-import com.reboluxBurger.backend.dto.AuthLoginRequest;
-import com.reboluxBurger.backend.dto.AuthRequest;
-import com.reboluxBurger.backend.dto.AuthResponse;
+import com.reboluxBurger.backend.dto.*;
 import com.reboluxBurger.backend.entity.User;
 import com.reboluxBurger.backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
@@ -53,4 +51,18 @@ public class AuthController {
         User updatedUser = authService.addPointsToUser(id, pointsToAdd);
         return ResponseEntity.ok(updatedUser);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.sendPasswordResetToken(request.getEmail());
+        return ResponseEntity.ok("Correo de recuperación enviado");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Contraseña actualizada correctamente");
+    }
+
+
 }
