@@ -107,16 +107,23 @@ public class AuthService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+
         User currentUser = currentUserProvider.getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("No estás autenticado");
         }
+
         if (currentUser.getRole() == Role.ADMIN) {
+            // Eliminar token de recuperación si existe
+            passwordResetTokenRepository.findByUser(user)
+                    .ifPresent(passwordResetTokenRepository::delete);
+
             userRepository.delete(user);
         } else {
             throw new RuntimeException("No tienes autorización para borrar este usuario");
         }
     }
+
 
     public User updateUser(Long userId, AuthRequest authRequest) {
         User existingUser = userRepository.findById(userId)
