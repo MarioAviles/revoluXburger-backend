@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -26,12 +27,12 @@ public class PasswordResetToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "expiration_date", nullable = false)
-    private ZonedDateTime expirationDate;
+    @Column(nullable = false)
+    private LocalDateTime expirationDate;
 
 
     public boolean isExpired() {
-        return expirationDate.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Madrid")));
+        return expirationDate.isBefore(LocalDateTime.now(ZoneId.of("Europe/Madrid")));
     }
 
 }
