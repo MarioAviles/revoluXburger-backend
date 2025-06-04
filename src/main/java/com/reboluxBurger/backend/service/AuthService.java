@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -177,7 +178,7 @@ public class AuthService {
 
         String token = UUID.randomUUID().toString();
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now().plusMinutes(30); // 30 minutos
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/Madrid")).plusMinutes(30);
         Date expiration = Date.from(zonedDateTime.toInstant());
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
