@@ -1,7 +1,9 @@
 package com.reboluxBurger.backend.repository;
 
 import com.reboluxBurger.backend.entity.Reservation;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -23,4 +25,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // Nuevo método para sumar personas por intervalo
     @Query("SELECT COALESCE(SUM(r.numberOfPersons), 0) FROM Reservation r WHERE r.date BETWEEN :start AND :end")
     int sumNumberOfPersonsByDateBetween(LocalDateTime start, LocalDateTime end);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Reservation r WHERE r.date < CURRENT_TIMESTAMP")
+    void deleteExpiredReservations();
 }

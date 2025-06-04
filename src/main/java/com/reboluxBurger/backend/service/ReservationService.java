@@ -35,10 +35,9 @@ public class ReservationService {
         this.emailService = emailService;
     }
 
-    @Scheduled(cron = "0 0 3 * * *") // Cada día a las 03:00 de la mañana
+    @Scheduled(cron = "0 0 3 * * *") // cada día a las 03:00 AM
     public void deleteExpiredReservations() {
-        List<Reservation> expiredReservations = reservationRepository.findByDateBefore(LocalDateTime.now());
-        reservationRepository.deleteAll(expiredReservations);
+        reservationRepository.deleteExpiredReservations();
     }
 
     public List<ReservationRequest> getAllReservations() {

@@ -12,6 +12,7 @@ import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import com.reboluxBurger.backend.security.CurrentUserProvider;
 import com.reboluxBurger.backend.security.JwtUtil;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -165,6 +166,7 @@ public class AuthService {
         return userRepository.save(user);
     }
 
+    @Async
     public void sendPasswordResetToken(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No existe usuario con ese email"));
@@ -209,11 +211,9 @@ public class AuthService {
 
     @Scheduled(fixedRate = 3600000) // cada hora
     public void eliminarTokensExpirados() {
-        List<PasswordResetToken> tokens = passwordResetTokenRepository.findAll();
-        tokens.stream()
-                .filter(PasswordResetToken::isExpired)
-                .forEach(passwordResetTokenRepository::delete);
+        passwordResetTokenRepository.deleteAllExpiredSinceNow();
     }
+
 
 
 
