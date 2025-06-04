@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -173,8 +174,9 @@ public class AuthService {
                 .ifPresent(passwordResetTokenRepository::delete);
 
         String token = UUID.randomUUID().toString();
-        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 30); // 30 minutos
 
+        ZonedDateTime zonedDateTime = ZonedDateTime.now().plusMinutes(30); // 30 minutos
+        Date expiration = Date.from(zonedDateTime.toInstant());
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
