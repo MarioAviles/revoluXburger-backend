@@ -178,7 +178,7 @@ public class AuthService {
 
         String token = UUID.randomUUID().toString();
 
-        ZonedDateTime expiration = ZonedDateTime.now(ZoneId.of("Europe/Madrid")).plusMinutes(30);
+        ZonedDateTime expiration = ZonedDateTime.now(ZoneId.of("Europe/London")).plusMinutes(30);
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
