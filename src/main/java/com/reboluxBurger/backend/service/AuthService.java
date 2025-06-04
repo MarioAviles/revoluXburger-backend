@@ -12,6 +12,7 @@ import com.reboluxBurger.backend.repository.ReservationRepository;
 import com.reboluxBurger.backend.repository.UserRepository;
 import com.reboluxBurger.backend.security.CurrentUserProvider;
 import com.reboluxBurger.backend.security.JwtUtil;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -167,8 +168,12 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No existe usuario con ese email"));
 
+        // Eliminar token anterior si existe
+        passwordResetTokenRepository.findByUser(user)
+                .ifPresent(passwordResetTokenRepository::delete);
+
         String token = UUID.randomUUID().toString();
-        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 30); // 30 min
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 30); // 30 minutos
 
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
@@ -176,13 +181,14 @@ public class AuthService {
         resetToken.setExpirationDate(expiration);
         passwordResetTokenRepository.save(resetToken);
 
-        String link = "https://revoluxburger-frontend.vercel.app/reset-password?token=" + token; //cambia esto por tu URL real
+        String link = "https://revoluxburger-frontend.vercel.app/reset-password?token=" + token;
         String body = "Hola " + user.getUsername() + ",\n\n" +
                 "Para restablecer tu contraseña, haz clic en el siguiente enlace:\n" + link + "\n\n" +
                 "Este enlace expirará en 30 minutos.";
 
         emailService.sendEmail(user.getEmail(), "Restablecer contraseña", body);
     }
+
 
     public void resetPassword(String token, String nuevaPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
@@ -198,6 +204,15 @@ public class AuthService {
 
         passwordResetTokenRepository.delete(resetToken); // borra token usado
     }
+
+    @Scheduled(fixedRate = 3600000) // cada hora
+    public void eliminarTokensExpirados() {
+        List<PasswordResetToken> tokens = passwordResetTokenRepository.findAll();
+        tokens.stream()
+                .filter(PasswordResetToken::isExpired)
+                .forEach(passwordResetTokenRepository::delete);
+    }
+
 
 
 }
