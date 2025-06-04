@@ -47,7 +47,8 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Permitir el acceso a los endpoints públicos
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 🔑 Preflight CORS
+
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
@@ -73,7 +74,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/categories").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/categories/**").authenticated()
 
-
                         .requestMatchers(HttpMethod.GET, "/images/list").permitAll()
                         .requestMatchers(HttpMethod.POST, "/images/upload").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/images/delete").permitAll()
@@ -83,21 +83,24 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://revoluxburger-frontend.vercel.app"
-        ));
+
+        // ✅ Permite todos los orígenes que coincidan con patrones
+        configuration.addAllowedOriginPattern("*");
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -105,3 +108,4 @@ public class SecurityConfig {
         return source;
     }
 }
+

@@ -32,13 +32,20 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
-                || path.equals("/auth/login")
-                || path.equals("/auth/register")
-                || path.equals("/auth/forgot-password")
-                || path.equals("/auth/reset-password");
+        String method = request.getMethod();
+
+        // Permitir preflight requests (CORS)
+        if ("OPTIONS".equalsIgnoreCase(method)) return true;
+
+        // Excluir rutas públicas del filtro JWT
+        return path.startsWith("/auth/login")
+                || path.startsWith("/auth/register")
+                || path.startsWith("/auth/forgot-password")
+                || path.startsWith("/auth/reset-password")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs");
     }
+
 
 
     @Override
