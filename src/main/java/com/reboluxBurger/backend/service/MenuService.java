@@ -61,8 +61,11 @@ public class MenuService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + request.getCategoryId()));
 
-        Type type = typeRepository.findById(request.getTypeId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + request.getTypeId()));
+        Type type = null;
+        if (request.getTypeId() != null) {
+            type = typeRepository.findById(request.getTypeId())
+                    .orElseThrow(() -> new RuntimeException("Tipo no encontrado con ID: " + request.getTypeId()));
+        }
 
         // Actualizar los campos del menú
         existingMenu.setName(request.getName());
