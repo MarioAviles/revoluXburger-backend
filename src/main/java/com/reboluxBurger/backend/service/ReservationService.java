@@ -93,6 +93,7 @@ public class ReservationService {
                 "⏰ Hora: " + savedReservation.getDate().toLocalTime() + "\n" +
                 "👤 Nombre de la reserva: " + savedReservation.getName() + "\n" +
                 "📧 Correo de contacto: " + savedReservation.getEmail() + "\n\n" +
+                "👥 Número de personas: " + reservation.getNumberOfPersons() + "\n" +
                 "Tu mesa estará lista a tu llegada. Nos esforzamos por ofrecer una experiencia gastronómica de alta calidad, con un ambiente acogedor y un servicio excepcional.\n\n" +
                 "Si necesitas realizar algún cambio o cancelar tu reserva, te pedimos que nos contactes con al menos 24 horas de antelación, respondiendo a este correo o escribiéndonos directamente a revoluxburger@gmail.com.\n\n" +
                 "Recuerda que también puedes seguirnos en nuestras redes sociales para mantenerte al tanto de nuestras promociones y novedades.\n\n" +
