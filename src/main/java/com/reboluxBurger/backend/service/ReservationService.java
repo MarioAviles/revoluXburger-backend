@@ -117,12 +117,12 @@ public class ReservationService {
 
         validateReservationFields(updatedReservation);
 
+        updatedReservation.setUser(existingReservation.getUser());
         existingReservation.setDate(updatedReservation.getDate());
         existingReservation.setDescription(updatedReservation.getDescription());
         existingReservation.setName(updatedReservation.getName());
         existingReservation.setPhone(updatedReservation.getPhone());
         existingReservation.setNumberOfPersons(updatedReservation.getNumberOfPersons());
-
 
         return reservationRepository.save(existingReservation);
     }
