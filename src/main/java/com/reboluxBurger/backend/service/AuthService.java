@@ -85,7 +85,11 @@ public class AuthService {
                 "Atentamente,\n\n" +
                 "El equipo de Revolux Burger 🍔";
 
-        emailService.sendEmail(user.getEmail(), subject, text);
+        try {
+            emailService.sendEmail(user.getEmail(), subject, text);
+        } catch (Exception e) {
+            System.err.println("Error al enviar el correo: " + e.getMessage());
+        }
 
         userRepository.save(user);
     }
@@ -190,7 +194,11 @@ public class AuthService {
                 "Para restablecer tu contraseña, haz clic en el siguiente enlace:\n" + link + "\n\n" +
                 "Este enlace expirará en 30 minutos.";
 
-        emailService.sendEmail(user.getEmail(), "Restablecer contraseña", body);
+        try {
+            emailService.sendEmail(user.getEmail(), "Restablecer contraseña", body);
+        } catch (Exception e) {
+            System.err.println("Error al enviar el correo: " + e.getMessage());
+        }
     }
 
 

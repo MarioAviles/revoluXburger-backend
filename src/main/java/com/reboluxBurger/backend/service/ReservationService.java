@@ -103,7 +103,11 @@ public class ReservationService {
                 "Atentamente,\n\n" +
                 "Equipo Revolux Burger 🍔\n";
 
-        emailService.sendEmail(savedReservation.getEmail(), subject, text);
+        try {
+            emailService.sendEmail(savedReservation.getEmail(), subject, text);
+        } catch (Exception e) {
+            System.err.println("Error al enviar el correo: " + e.getMessage());
+        }
 
         return savedReservation;
     }
@@ -151,7 +155,11 @@ public class ReservationService {
                 "Atentamente,\n\n" +
                 "Equipo Revolux Burger 🍔\n";
 
-        emailService.sendEmail(reservation.getEmail(), subject, text);
+        try {
+            emailService.sendEmail(reservation.getEmail(), subject, text);
+        } catch (Exception e) {
+            System.err.println("Error al enviar el correo: " + e.getMessage());
+        }
     }
 
 
