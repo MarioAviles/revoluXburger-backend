@@ -59,11 +59,7 @@ public class TypeService {
     public Type getOrCreateType(String name) {
         String normalized = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         Optional<Type> existing = typeRepository.findByName(normalized);
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            return typeRepository.save(new Type(null, normalized));
-        }
+        return existing.orElseGet(() -> typeRepository.save(new Type(null, normalized)));
     }
 
 

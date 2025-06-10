@@ -14,6 +14,7 @@ public class CurrentUserProvider {
         this.userRepository = userRepository;
     }
 
+    //determina si el usuario actual está autenticado y devuelve su información
     public User getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()

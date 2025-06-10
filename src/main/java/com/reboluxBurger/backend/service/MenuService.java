@@ -9,9 +9,7 @@ import com.reboluxBurger.backend.enums.Role;
 import com.reboluxBurger.backend.repository.CategoryRepository;
 import com.reboluxBurger.backend.repository.MenuRepository;
 import com.reboluxBurger.backend.repository.TypeRepository;
-import com.reboluxBurger.backend.repository.UserRepository;
 import com.reboluxBurger.backend.security.CurrentUserProvider;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,36 +18,37 @@ import java.util.stream.Collectors;
 @Service
 public class MenuService {
 
+    // Repositorios necesarios para acceder a la base de datos
     private final MenuRepository menuRepository;
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TypeRepository typeRepository;
     private final CurrentUserProvider currentUserProvider;
 
-
-    public MenuService(MenuRepository menuRepository, UserRepository userRepository, CategoryRepository categoryRepository, TypeRepository typeRepository, CurrentUserProvider currentUserProvider) {
+    // Constructor que inyecta las dependencias del servicio
+    public MenuService(MenuRepository menuRepository, CategoryRepository categoryRepository, TypeRepository typeRepository, CurrentUserProvider currentUserProvider) {
         this.menuRepository = menuRepository;
-        this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.typeRepository = typeRepository;
         this.currentUserProvider = currentUserProvider;
     }
 
+    // Devuelve todos los menús en forma de DTO MenuRequest
     public List<MenuRequest> getAllMenus() {
         return menuRepository.findAll().stream()
-                .map(this::mapToMenuRequest)
+                .map(this::mapToMenuRequest) // mapea cada entidad a DTO
                 .collect(Collectors.toList());
     }
 
+    // Crea un nuevo menú (solo si es admin)
     public Menu createMenu(MenuRequest request) {
         User currentUser = currentUserProvider.getCurrentUser();
         requireAdminRole(currentUser, "No tienes permiso para crear un menú");
 
-        Menu menu = mapToMenuEntity(request);
-        return menuRepository.save(menu);
+        Menu menu = mapToMenuEntity(request); // convierte el DTO en entidad
+        return menuRepository.save(menu); // guarda el menú
     }
 
-
+    // Actualiza un menú existente (solo si es admin)
     public Menu updateMenu(Long id, MenuRequest request) {
         Menu existingMenu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menú no encontrado con id: " + id));
@@ -57,17 +56,18 @@ public class MenuService {
         User currentUser = currentUserProvider.getCurrentUser();
         requireAdminRole(currentUser, "No tienes permiso para modificar el menú");
 
-        // Buscar la categoría por ID
+        // Buscar la categoría del menú
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + request.getCategoryId()));
 
+        // Buscar el tipo si se proporciona
         Type type = null;
         if (request.getTypeId() != null) {
             type = typeRepository.findById(request.getTypeId())
                     .orElseThrow(() -> new RuntimeException("Tipo no encontrado con ID: " + request.getTypeId()));
         }
 
-        // Actualizar los campos del menú
+        // Actualiza los atributos del menú con los valores del DTO
         existingMenu.setName(request.getName());
         existingMenu.setDescription(request.getDescription());
         existingMenu.setCategory(category);
@@ -76,13 +76,14 @@ public class MenuService {
         existingMenu.setImageUrl(request.getImageUrl());
         existingMenu.setPrice(request.getPrice());
 
-        return menuRepository.save(existingMenu);
+        return menuRepository.save(existingMenu); // guarda los cambios
     }
 
-
+    // Elimina un menú por ID (solo si es admin)
     public void deleteMenu(Long id) {
         User currentUser = currentUserProvider.getCurrentUser();
 
+        // Verifica si es admin
         if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
             throw new RuntimeException("No tienes permisos para eliminar el menú");
         }
@@ -91,18 +92,17 @@ public class MenuService {
             throw new RuntimeException("Menú no encontrado");
         }
 
-        menuRepository.deleteById(id);
+        menuRepository.deleteById(id); // elimina el menú
     }
 
-
-    // Métodos auxiliares
-
+    // Método auxiliar para comprobar si un usuario es administrador
     private void requireAdminRole(User user, String errorMessage) {
         if (user == null || user.getRole() != Role.ADMIN) {
             throw new RuntimeException(errorMessage);
         }
     }
 
+    // Mapea una entidad Menu a un DTO MenuRequest
     private MenuRequest mapToMenuRequest(Menu menu) {
         return new MenuRequest(
                 menu.getId(),
@@ -116,6 +116,7 @@ public class MenuService {
         );
     }
 
+    // Convierte un DTO MenuRequest a una entidad Menu
     private Menu mapToMenuEntity(MenuRequest dto) {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoryId()));
@@ -126,7 +127,7 @@ public class MenuService {
                     .orElseThrow(() -> new RuntimeException("Tipo no encontrado con ID: " + dto.getTypeId()));
         }
 
-
+        // Crea una nueva entidad Menu con los datos proporcionados
         return new Menu(
                 dto.getId(),
                 dto.getName(),

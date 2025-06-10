@@ -56,12 +56,8 @@ public class CategoryService {
 
     // Obtiene una categoría por nombre, o la crea si no existe
     public Category getOrCreateCategory(String name, String imageUrl) {
-        String normalized = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-        Optional<Category> existing = categoryRepository.findByName(normalized);
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            return categoryRepository.save(new Category(null, normalized, imageUrl));
-        }
+        String normalized = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase(); // Normaliza el nombre
+        Optional<Category> existing = categoryRepository.findByName(normalized); // Busca la categoría por nombre normalizado
+        return existing.orElseGet(() -> categoryRepository.save(new Category(null, normalized, imageUrl))); // Si no existe, la crea con el nombre normalizado y la imagen proporcionada
     }
 }

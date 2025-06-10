@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,14 +28,16 @@ import java.util.stream.Collectors;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository; //llamo a donde se almacenan los usuarios
+    // Repositorio de usuarios, reservas y tokens de recuperación
+    private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
-    private final PasswordEncoder passwordEncoder; //llamo al codificador de contraseñas
-    private final JwtUtil jwtUtil; //llamo a jwt
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
     private final CurrentUserProvider currentUserProvider;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
+    // Constructor que inyecta las dependencias necesarias para el servicio de autenticación
     public AuthService(UserRepository userRepository, ReservationRepository reservationRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, CurrentUserProvider currentUserProvider , EmailService emailService, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
@@ -48,32 +48,35 @@ public class AuthService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
-    public AuthResponse login(AuthLoginRequest request) { //le paso por parametro lo que me envian por post
-        Optional<User> user = userRepository.findByUsername(request.getUsername()); //cojo el nombre que me han pasado por parametro y uso la funcion para buscarlo
-        if (user.isPresent() && passwordEncoder.matches(request.getPassword(),(user.get().getPassword())) ) { //si el usuario existe y la contraseña que me han pasado por parametro coincide con la del usuario
-            String token = jwtUtil.generateToken(user.get()); //me genera un token y me lo manda por respuesta
+    // Método para login: valida usuario y contraseña, y genera un token JWT si son válidos
+    public AuthResponse login(AuthLoginRequest request) {
+        Optional<User> user = userRepository.findByUsername(request.getUsername());
+        if (user.isPresent() && passwordEncoder.matches(request.getPassword(),(user.get().getPassword())) ) {
+            String token = jwtUtil.generateToken(user.get()); // genera token JWT
             return new AuthResponse(token);
         }
-        throw new RuntimeException("Credenciales incorrectas"); //sino da error
+        throw new RuntimeException("Credenciales incorrectas");
     }
 
-    public void register(AuthRequest request) { //le paso por parametro los datos
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) { //busco el nombre para ver si ya existe el usuario
-            throw new RuntimeException("El usuario ya existe"); //si existe salta un error
+    // Método para registrar un nuevo usuario en el sistema
+    public void register(AuthRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("El usuario ya existe");
         }
-        User user = new User(); //sino crea un nuevo usuario y asigna los datos
+
+        User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // encripta la contraseña
         user.setEmail(request.getEmail());
 
-        Long points = request.getPoints() == null ? 0 : request.getPoints();
+        Long points = request.getPoints() == null ? 0 : request.getPoints(); // puntos por defecto: 0
         user.setPoints(points);
 
-        Role role = (request.getRole() == null || request.getRole().describeConstable().isEmpty()) ? Role.USER : request.getRole();
+        Role role = (request.getRole() == null || request.getRole().describeConstable().isEmpty()) ? Role.USER : request.getRole(); // rol por defecto: USER
         user.setRole(role);
 
+        // Prepara y envía el correo de confirmación
         String subject = "Confirmación de tu registro en Revolux Burger";
-
         String text = "Estimado/a " + user.getUsername() + ",\n\n" +
                 "Nos complace darte la bienvenida a la familia de *Revolux Burger*.\n\n" +
                 "Tu registro se ha completado exitosamente el día " +
@@ -86,24 +89,28 @@ public class AuthService {
                 "El equipo de Revolux Burger 🍔";
 
         try {
-            emailService.sendEmail(user.getEmail(), subject, text);
+            emailService.sendEmail(user.getEmail(), subject, text); // envía el correo de bienvenida
         } catch (Exception e) {
             System.err.println("Error al enviar el correo: " + e.getMessage());
         }
 
-        userRepository.save(user);
+        userRepository.save(user); // guarda el nuevo usuario
     }
 
+    // Devuelve todos los usuarios dependiendo del rol del usuario actual
     public List<AuthRequest> getAllUsers() {
         User currentUser = currentUserProvider.getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("No estás autenticado");
         }
-        if (currentUser.getRole() == Role.ADMIN) { //si el usuario es admin ve todos los usuarios
+
+        // Si es admin, ve todos los usuarios con sus reservas
+        if (currentUser.getRole() == Role.ADMIN) {
             return userRepository.findAll().stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getNumberOfPersons(), reservation.getEmail(), reservation.getUser().getId()))
                             .collect(Collectors.toList())))
                     .collect(Collectors.toList());
-        } else if (currentUser.getRole() == Role.USER && !currentUser.getUsername().equals("anonymous")) { //si el usuario es un usuario normal y no es anónimo ve sus propios datos
+        } else if (currentUser.getRole() == Role.USER && !currentUser.getUsername().equals("anonymous")) {
+            // Si es usuario normal, solo ve sus propios datos
             return userRepository.findByUsername(currentUser.getUsername()).stream().map(user -> new AuthRequest(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPoints(), user.getRole(), reservationRepository.findByUserId(user.getId()).stream().map(reservation -> new ReservationRequest(reservation.getId(), reservation.getName(), reservation.getDescription(), reservation.getPhone(), reservation.getDate(), reservation.getNumberOfPersons(), reservation.getEmail(), reservation.getUser().getId()))
                             .collect(Collectors.toList())))
                     .collect(Collectors.toList());
@@ -112,6 +119,7 @@ public class AuthService {
         }
     }
 
+    // Elimina un usuario si el actual es administrador
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
@@ -122,7 +130,7 @@ public class AuthService {
         }
 
         if (currentUser.getRole() == Role.ADMIN) {
-            // Eliminar token de recuperación si existe
+            // Elimina token de recuperación si existe
             passwordResetTokenRepository.findByUser(user)
                     .ifPresent(passwordResetTokenRepository::delete);
 
@@ -132,10 +140,11 @@ public class AuthService {
         }
     }
 
-
+    // Permite actualizar los datos de un usuario (a sí mismo o cualquier otro si es admin)
     public User updateUser(Long userId, AuthRequest authRequest) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("No existe un usuario con ese id"));
+
         User currentUser = currentUserProvider.getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("No estás autenticado");
@@ -145,20 +154,22 @@ public class AuthService {
 
             existingUser.setUsername(authRequest.getUsername());
             if (authRequest.getPassword() != null && !authRequest.getPassword().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(authRequest.getPassword()));
+                existingUser.setPassword(passwordEncoder.encode(authRequest.getPassword())); // codifica la nueva contraseña
             }
             existingUser.setEmail(authRequest.getEmail());
 
+            // Si es admin, puede modificar rol y puntos
             if (currentUser.getRole() == Role.ADMIN) {
                 existingUser.setRole(authRequest.getRole());
                 existingUser.setPoints(authRequest.getPoints() != null ? authRequest.getPoints() : existingUser.getPoints());
             }
 
-            return userRepository.save(existingUser);
+            return userRepository.save(existingUser); // guarda los cambios
         }
         throw new RuntimeException("No tienes autorización para actualizar este usuario");
     }
 
+    // Añade puntos a un usuario existente
     public User addPointsToUser(Long userId, Long pointsToAdd) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -167,20 +178,21 @@ public class AuthService {
             user.setPoints(0L);
         }
 
-        user.setPoints(user.getPoints() + pointsToAdd);
+        user.setPoints(user.getPoints() + pointsToAdd); // suma los puntos
         return userRepository.save(user);
     }
 
+    // Envía un correo con el token de recuperación de contraseña
     @Async
     public void sendPasswordResetToken(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No existe usuario con ese email"));
 
-        // Eliminar token anterior si existe
+        // Elimina token anterior si ya existía
         passwordResetTokenRepository.findByUser(user)
                 .ifPresent(passwordResetTokenRepository::delete);
 
-        String token = UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString(); // genera token aleatorio
 
         LocalDateTime expiration = LocalDateTime.now(ZoneId.of("Europe/Madrid")).plusMinutes(30);
         PasswordResetToken resetToken = new PasswordResetToken();
@@ -189,6 +201,7 @@ public class AuthService {
         resetToken.setExpirationDate(expiration);
         passwordResetTokenRepository.save(resetToken);
 
+        // Construye y envía el email con el enlace de recuperación
         String link = "https://revoluxburger-frontend.vercel.app/reset-password?token=" + token;
         String body = "Hola " + user.getUsername() + ",\n\n" +
                 "Para restablecer tu contraseña, haz clic en el siguiente enlace:\n" + link + "\n\n" +
@@ -201,7 +214,7 @@ public class AuthService {
         }
     }
 
-
+    // Permite al usuario cambiar su contraseña usando un token válido
     public void resetPassword(String token, String nuevaPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Token inválido"));
@@ -211,18 +224,16 @@ public class AuthService {
         }
 
         User user = resetToken.getUser();
-        user.setPassword(passwordEncoder.encode(nuevaPassword));
+        user.setPassword(passwordEncoder.encode(nuevaPassword)); // guarda la nueva contraseña encriptada
         userRepository.save(user);
 
-        passwordResetTokenRepository.delete(resetToken); // borra token usado
+        passwordResetTokenRepository.delete(resetToken); // elimina el token usado
     }
 
-    @Scheduled(fixedRate = 3600000) // cada hora
+    // Tarea programada que elimina tokens de recuperación expirados cada hora
+    @Scheduled(fixedRate = 3600000)
     public void eliminarTokensExpirados() {
         passwordResetTokenRepository.deleteAllExpiredSinceNow();
     }
-
-
-
 
 }
