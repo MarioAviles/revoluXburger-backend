@@ -32,6 +32,7 @@ public class ImageService {
         this.restTemplate = new RestTemplate();
     }
 
+
     // SUBIR imagen a Supabase Storage
     public String uploadImage(MultipartFile file, String folder) throws java.io.IOException {
 
