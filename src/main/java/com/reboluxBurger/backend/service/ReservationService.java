@@ -96,11 +96,11 @@ public class ReservationService {
         String subject = "Confirmación de tu reserva en Revolux Burger";
         String text = generateConfirmationEmailText(savedReservation, calendarUrl);
 
-     //   try {
-      //      emailService.sendEmail(savedReservation.getEmail(), subject, text);
-      //  } catch (Exception e) {
-        //    System.err.println("Error al enviar el correo: " + e.getMessage());
-       // }
+        try {
+            emailService.sendEmail(savedReservation.getEmail(), subject, text);
+        } catch (Exception e) {
+            System.err.println("Error al enviar el correo: " + e.getMessage());
+        }
 
         return savedReservation;
     }
