@@ -137,12 +137,9 @@ public class ImageService {
     // -------- Borrar ----------
     public void deleteImage(String folder, String filename) {
         try {
-            // Codificar correctamente (sin '+', usando %20)
-            String encodedFolder = URLEncoder.encode(folder, StandardCharsets.UTF_8).replace("+", "%20");
-            String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
-
+            // ⚠️ NO codificar aquí: el frontend ya manda la URL codificada (con %20)
             String deleteUrl = SUPABASE_URL + "/storage/v1/object/"
-                    + BUCKET_NAME + "/" + encodedFolder + "/" + encodedFilename;
+                    + BUCKET_NAME + "/" + folder + "/" + filename;
 
             HttpHeaders headers = storageHeaders();
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
@@ -159,5 +156,5 @@ public class ImageService {
             throw new RuntimeException("Error al eliminar imagen: " + e.getMessage());
         }
     }
-
 }
+
