@@ -16,16 +16,16 @@ import java.util.List;
 @Service
 public class ImageService {
 
-    @Value("${supabase.url}")
+    @Value("${supabase.url:${SUPABASE_URL:}}")
     private String SUPABASE_URL;
 
-    @Value("${supabase.bucket}")
+    @Value("${supabase.bucket:${SUPABASE_BUCKET:}}")
     private String BUCKET_NAME;
 
-    @Value("${supabase.apikey}") // anon (fallback)
+    @Value("${supabase.apikey:${SUPABASE_API_KEY:}}")
     private String SUPABASE_API_KEY;
 
-    @Value("${supabase.service_role_key:}") // service role (si existe, bypass RLS)
+    @Value("${supabase.service_role_key:${SUPABASE_SERVICE_ROLE_KEY:}}")
     private String SUPABASE_SERVICE_ROLE_KEY;
 
     private final RestTemplate restTemplate;
@@ -34,13 +34,12 @@ public class ImageService {
         this.restTemplate = new RestTemplate();
     }
 
-    // ---- Helpers ------------------------------------------------------------
-
+    // -------- Helpers ----------
     private HttpHeaders storageHeaders() {
         HttpHeaders headers = new HttpHeaders();
         String key = (SUPABASE_SERVICE_ROLE_KEY != null && !SUPABASE_SERVICE_ROLE_KEY.isBlank())
                 ? SUPABASE_SERVICE_ROLE_KEY
-                : SUPABASE_API_KEY; // fallback a anon si no hay service role
+                : SUPABASE_API_KEY;
         headers.set("Authorization", "Bearer " + key);
         headers.set("apikey", key);
         return headers;
@@ -61,26 +60,21 @@ public class ImageService {
         return SUPABASE_URL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + path;
     }
 
-    // ---- Subir --------------------------------------------------------------
-
+    // -------- Subir ----------
     public String uploadImage(MultipartFile file, String folder) throws java.io.IOException {
         String filename = file.getOriginalFilename();
-        if (filename == null || filename.isBlank()) {
+        if (filename == null || filename.isBlank())
             throw new IllegalArgumentException("Nombre de archivo inválido");
-        }
 
         String path = joinPath(folder, filename);
         String uploadUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + path;
 
         HttpHeaders headers = storageHeaders();
 
-        // Detectar MIME
         String mimeType = URLConnection.guessContentTypeFromName(filename);
         if (mimeType == null) mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         headers.setContentType(MediaType.parseMediaType(mimeType));
-
-        // Permitir sobreescritura si ya existe
-        headers.set("x-upsert", "true");
+        headers.set("x-upsert", "true"); // opcional, permite sobrescribir
 
         HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
 
@@ -95,8 +89,7 @@ public class ImageService {
         }
     }
 
-    // ---- Listar -------------------------------------------------------------
-
+    // -------- Listar ----------
     public List<ImageDto> listImages(String folder) {
         String listUrl = SUPABASE_URL + "/storage/v1/object/list/" + BUCKET_NAME;
 
@@ -106,7 +99,6 @@ public class ImageService {
         String prefix = normalizeFolder(folder);
         if (!prefix.isEmpty()) prefix = prefix + "/";
 
-        // puedes añadir limit/sortBy si quieres
         String requestBody = "{\"prefix\":\"" + prefix + "\"}";
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
@@ -125,8 +117,7 @@ public class ImageService {
 
             for (JsonNode node : root) {
                 if (node.has("name")) {
-                    String nameFromApi = node.get("name").asText(); // normalmente "archivo.jpg"
-                    // por si acaso llega "carpeta/archivo.jpg", quédate con el basename:
+                    String nameFromApi = node.get("name").asText();
                     String fileName = nameFromApi.contains("/")
                             ? nameFromApi.substring(nameFromApi.lastIndexOf('/') + 1)
                             : nameFromApi;
@@ -141,8 +132,7 @@ public class ImageService {
         }
     }
 
-    // ---- Borrar -------------------------------------------------------------
-
+    // -------- Borrar ----------
     public void deleteImage(String folder, String filename) {
         String deletePath = joinPath(folder, filename);
         String deleteUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + deletePath;
