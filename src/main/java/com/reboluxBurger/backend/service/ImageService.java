@@ -8,6 +8,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -134,18 +136,27 @@ public class ImageService {
 
     // -------- Borrar ----------
     public void deleteImage(String folder, String filename) {
-        String deletePath = joinPath(folder, filename);
-        String deleteUrl = SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + deletePath;
+        try {
+            // Codifica nombres para evitar errores con espacios, tildes, etc.
+            String encodedFolder = URLEncoder.encode(folder, StandardCharsets.UTF_8);
+            String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
 
-        HttpHeaders headers = storageHeaders();
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            String deleteUrl = SUPABASE_URL + "/storage/v1/object/"
+                    + BUCKET_NAME + "/" + encodedFolder + "/" + encodedFilename;
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                deleteUrl, HttpMethod.DELETE, requestEntity, String.class
-        );
+            HttpHeaders headers = storageHeaders();
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Error al eliminar imagen: " + response.getBody());
+            ResponseEntity<String> response = restTemplate.exchange(
+                    deleteUrl, HttpMethod.DELETE, requestEntity, String.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Error al eliminar imagen: " + response.getBody());
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar imagen: " + e.getMessage());
         }
     }
 }
