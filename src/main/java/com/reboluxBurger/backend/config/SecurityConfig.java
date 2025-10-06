@@ -93,8 +93,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/images/delete").permitAll()
 
                         // Reservas: creación y consulta abierta, modificación protegida
-                        .requestMatchers("/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reservations").permitAll()
+                        .requestMatchers("/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.GET, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/reservations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/reservations/**").authenticated()
