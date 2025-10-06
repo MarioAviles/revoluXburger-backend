@@ -137,9 +137,9 @@ public class ImageService {
     // -------- Borrar ----------
     public void deleteImage(String folder, String filename) {
         try {
-            // Codifica nombres para evitar errores con espacios, tildes, etc.
-            String encodedFolder = URLEncoder.encode(folder, StandardCharsets.UTF_8);
-            String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
+            // Codificar correctamente (sin '+', usando %20)
+            String encodedFolder = URLEncoder.encode(folder, StandardCharsets.UTF_8).replace("+", "%20");
+            String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
 
             String deleteUrl = SUPABASE_URL + "/storage/v1/object/"
                     + BUCKET_NAME + "/" + encodedFolder + "/" + encodedFilename;
@@ -159,4 +159,5 @@ public class ImageService {
             throw new RuntimeException("Error al eliminar imagen: " + e.getMessage());
         }
     }
+
 }
